@@ -12,6 +12,9 @@
  File Encoding         : 65001
 
  Date: 21/03/2021 22:39:29
+
+ ---
+ sudo docker run --name mysql57 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql57 -d mysql:5.7
 */
 
 SET NAMES utf8mb4;
