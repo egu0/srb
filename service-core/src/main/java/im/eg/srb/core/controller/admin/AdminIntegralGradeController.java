@@ -1,7 +1,7 @@
 package im.eg.srb.core.controller.admin;
 
 
-import im.eg.common.exception.BusinessException;
+import im.eg.common.exception.Assert;
 import im.eg.common.result.R;
 import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.pojo.entity.IntegralGrade;
@@ -31,11 +31,6 @@ public class AdminIntegralGradeController {
     @Resource
     private IntegralGradeService integralGradeService;
 
-    /**
-     * 查询积分等级列表
-     * <p>
-     * 尝试：curl http://localhost:8110/admin/core/integralGrade/list
-     */
     @ApiOperation("积分等级列表")
     @GetMapping("/list")
     public R listAll() {
@@ -43,11 +38,6 @@ public class AdminIntegralGradeController {
         return R.ok().data("list", list).message("获取列表成功");
     }
 
-    /**
-     * 根据 id 删除指定的积分等级记录
-     * <p>
-     * 尝试：curl -X DELETE http://localhost:8110/admin/core/integralGrade/remove/1
-     */
     @ApiOperation(value = "根据 ID 删除积分等级", notes = "逻辑删除数据")
     @DeleteMapping("/remove/{id}")
     public R removeById(@ApiParam(value = "记录编号 ID", example = "100", required = true) @PathVariable Long id) {
@@ -62,9 +52,7 @@ public class AdminIntegralGradeController {
     @PostMapping("/save")
     public R save(@ApiParam(value = "积分等级对象", required = true) @RequestBody IntegralGrade integralGrade) {
 
-        if (integralGrade.getBorrowAmount() == null) {
-            throw new BusinessException(ResponseEnum.BORROW_AMOUNT_NULL_ERROR);
-        }
+        Assert.notNull(integralGrade.getBorrowAmount(), ResponseEnum.BORROW_AMOUNT_NULL_ERROR);
 
         if (integralGradeService.save(integralGrade)) {
             return R.ok().message("保存成功");
@@ -94,4 +82,3 @@ public class AdminIntegralGradeController {
         }
     }
 }
-
