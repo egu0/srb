@@ -18,8 +18,14 @@ public class UnifiedExceptionHandler {
     }
 
     @ExceptionHandler(BadSqlGrammarException.class)
-    public R badSqlGrammarException(BadSqlGrammarException ex) {
+    public R handleException(BadSqlGrammarException ex) {
         log.error(ex.getMessage(), ex);
         return R.setResult(ResponseEnum.BAD_SQL_GRAMMAR_ERROR);
+    }
+
+    @ExceptionHandler(value = BusinessException.class)
+    public R handleException(BusinessException e) {
+        log.error(e.getMessage(), e);
+        return R.error().message(e.getMessage()).code(e.getCode());
     }
 }

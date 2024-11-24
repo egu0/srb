@@ -1,7 +1,9 @@
 package im.eg.srb.core.controller.admin;
 
 
+import im.eg.common.exception.BusinessException;
 import im.eg.common.result.R;
+import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.pojo.entity.IntegralGrade;
 import im.eg.srb.core.service.IntegralGradeService;
 import io.swagger.annotations.Api;
@@ -59,6 +61,11 @@ public class AdminIntegralGradeController {
     @ApiOperation(value = "新增积分等级")
     @PostMapping("/save")
     public R save(@ApiParam(value = "积分等级对象", required = true) @RequestBody IntegralGrade integralGrade) {
+
+        if (integralGrade.getBorrowAmount() == null) {
+            throw new BusinessException(ResponseEnum.BORROW_AMOUNT_NULL_ERROR);
+        }
+
         if (integralGradeService.save(integralGrade)) {
             return R.ok().message("保存成功");
         } else {
