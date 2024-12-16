@@ -4,7 +4,7 @@
     <contextName>srb</contextName>
 
     <!--日志输出目录-->
-    <property name="log.path" value="/home/eg/tmp"/>
+    <property name="log.path" value="/tmp"/>
 
     <!--控制台日志格式：彩色日志-->
     <!--magenta：洋红-->

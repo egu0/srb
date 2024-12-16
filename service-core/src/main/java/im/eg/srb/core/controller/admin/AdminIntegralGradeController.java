@@ -73,7 +73,7 @@ public class AdminIntegralGradeController {
     }
 
     @ApiOperation(value = "更新积分等级")
-    @PostMapping("/update")
+    @PutMapping("/update")
     public R updateById(@ApiParam(value = "积分等级对象", required = true) @RequestBody IntegralGrade integralGrade) {
         if (integralGradeService.updateById(integralGrade)) {
             return R.ok().message("更新成功");
