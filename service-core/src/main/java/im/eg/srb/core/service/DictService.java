@@ -1,7 +1,9 @@
 package im.eg.srb.core.service;
 
-import im.eg.srb.core.pojo.entity.Dict;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.entity.Dict;
+
+import java.io.InputStream;
 
 /**
  * <p>
@@ -12,5 +14,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2024-11-23
  */
 public interface DictService extends IService<Dict> {
+
+    /**
+     * 導入數據
+     */
+    void importData(InputStream ins);
 
 }
