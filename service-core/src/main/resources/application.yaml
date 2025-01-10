@@ -16,4 +16,5 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  mapper-locations: classpath:im/eg/srb/core/mapper/xml/*.xml
+  # 默認的配置見 MybatisPlusProperties 類
+  mapper-locations: classpath:/mapper/xml/*.xml
