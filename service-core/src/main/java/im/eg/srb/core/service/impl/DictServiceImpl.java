@@ -28,7 +28,7 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     @Transactional(rollbackFor = Exception.class) // 出現異常時會滾
     @Override
     public void importData(InputStream ins) {
-        EasyExcel.read(ins, ExcelDictDTO.class, new ExcelDictDtoListener()).sheet().doRead();
+        EasyExcel.read(ins, ExcelDictDTO.class, new ExcelDictDtoListener(baseMapper)).sheet().doRead();
         log.info("導入成功！");
     }
 }
