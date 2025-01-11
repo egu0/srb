@@ -8,10 +8,13 @@ import im.eg.srb.core.pojo.dto.ExcelDictDTO;
 import im.eg.srb.core.pojo.entity.Dict;
 import im.eg.srb.core.service.DictService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -30,5 +33,17 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
     public void importData(InputStream ins) {
         EasyExcel.read(ins, ExcelDictDTO.class, new ExcelDictDtoListener(baseMapper)).sheet().doRead();
         log.info("導入成功！");
+    }
+
+    @Override
+    public List<ExcelDictDTO> listDictData() {
+        List<Dict> dictList = baseMapper.selectList(null);
+        List<ExcelDictDTO> result = new ArrayList<>(dictList.size());
+        for (Dict dict : dictList) {
+            ExcelDictDTO dto = new ExcelDictDTO();
+            BeanUtils.copyProperties(dict, dto);
+            result.add(dto);
+        }
+        return result;
     }
 }
