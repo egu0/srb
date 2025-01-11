@@ -6,6 +6,7 @@ import im.eg.common.exception.BusinessException;
 import im.eg.common.result.R;
 import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.pojo.dto.ExcelDictDTO;
+import im.eg.srb.core.pojo.entity.Dict;
 import im.eg.srb.core.service.DictService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,6 +61,15 @@ public class AdminDictController {
         response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
         List<ExcelDictDTO> result = dictService.listDictData();
         EasyExcel.write(response.getOutputStream(), ExcelDictDTO.class).sheet("數據字典").doWrite(result);
+    }
+
+    @ApiOperation("根據父級 ID 獲取子節點數據列表")
+    @GetMapping("/listByParentId/{parentId}")
+    public R listByParentId(
+            @ApiParam(value = "parentId", required = true)
+            @PathVariable("parentId") Long parentId) {
+        List<Dict> dictList = dictService.listByParentId(parentId);
+        return R.ok().data("list", dictList);
     }
 
 }

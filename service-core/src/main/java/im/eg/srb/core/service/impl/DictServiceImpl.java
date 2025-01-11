@@ -1,6 +1,7 @@
 package im.eg.srb.core.service.impl;
 
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.srb.core.listener.ExcelDictDtoListener;
 import im.eg.srb.core.mapper.DictMapper;
@@ -45,5 +46,30 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
             result.add(dto);
         }
         return result;
+    }
+
+    @Override
+    public List<Dict> listByParentId(Long parentId) {
+        QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", parentId);
+        List<Dict> dictList = baseMapper.selectList(queryWrapper);
+        // 填充 hasChildren 屬性
+        dictList.forEach(dict -> {
+            // 判斷當前節點是否有子節點
+            dict.setHasChildren(hasChildren(dict.getId()));
+        });
+        return dictList;
+    }
+
+    /**
+     * 判斷當前節點是否有子節點
+     *
+     * @param id 當前節點 id
+     */
+    private boolean hasChildren(Long id) {
+        QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", id);
+        Integer count = baseMapper.selectCount(queryWrapper);
+        return count > 0;
     }
 }

@@ -23,4 +23,6 @@ public interface DictService extends IService<Dict> {
     void importData(InputStream ins);
 
     List<ExcelDictDTO> listDictData();
+
+    List<Dict> listByParentId(Long parentId);
 }
