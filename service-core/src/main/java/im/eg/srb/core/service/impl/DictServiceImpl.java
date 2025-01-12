@@ -10,12 +10,15 @@ import im.eg.srb.core.pojo.entity.Dict;
 import im.eg.srb.core.service.DictService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -28,6 +31,9 @@ import java.util.List;
 @Slf4j
 @Service
 public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements DictService {
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Transactional(rollbackFor = Exception.class) // 出現異常時會滾
     @Override
@@ -50,6 +56,21 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
 
     @Override
     public List<Dict> listByParentId(Long parentId) {
+        String cacheKey = "srb:core:dict_list:" + parentId;
+        try {
+            // 1.查詢緩存
+            Object cached = redisTemplate.opsForValue().get(cacheKey);
+
+            // 2.如果命中緩存，那麼直接返回
+            if (cached instanceof List) {
+                return (List<Dict>) cached;
+            }
+        } catch (Exception ex) {
+            log.error("查詢字典列表緩存失敗", ex);
+        }
+
+        // 3.若不存在，則把從數據庫中查到的數據放入緩存
+        // 查詢數據庫
         QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("parent_id", parentId);
         List<Dict> dictList = baseMapper.selectList(queryWrapper);
@@ -58,6 +79,13 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
             // 判斷當前節點是否有子節點
             dict.setHasChildren(hasChildren(dict.getId()));
         });
+
+        try {
+            redisTemplate.opsForValue().set(cacheKey, dictList, 5, TimeUnit.MINUTES);
+        } catch (Exception ex) {
+            log.error("保存字典列表緩存失敗", ex);
+        }
+
         return dictList;
     }
 
