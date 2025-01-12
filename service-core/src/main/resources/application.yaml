@@ -12,6 +12,23 @@ spring:
     url: jdbc:mysql://localhost:3306/srb_core?serverTimezone=GMT%2B8&characterEncoding=utf-8
     username: root
     password: mysql8
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    password: redson
+    # 最大等待時長，超時則拋出異常，否則請求一直等待
+    timeout: 3000ms
+    lettuce:
+      pool:
+        # 最大連結數
+        max-active: 30
+        # 最大阻塞等待時間，默認 -1，負數表示沒有限制
+        max-wait: -1
+        # 最大空閒連結，默認 8
+        max-idle: 8
+        # 最小空閒連結，默認 8
+        min-idle: 0
 
 mybatis-plus:
   configuration:
