@@ -1,16 +1,12 @@
 package im.eg.srb.sms;
 
 import im.eg.srb.sms.util.SmsProperties;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 public class UtilTests {
 
-    @Test
+    @org.junit.jupiter.api.Test // 和 org.junit.Test 做區別
     public void printProperties() {
         System.out.println(SmsProperties.REGION_ID);
         System.out.println(SmsProperties.KEY_ID);
