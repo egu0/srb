@@ -26,7 +26,7 @@ spring:
 
 aliyun:
   sms:
-    region-id: cn-hangzhou
+    region-id: cn-hangzhou-finance
     key-id:
     key-secret:
     template-code: SMS_154950909
