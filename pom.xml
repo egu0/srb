@@ -8,6 +8,7 @@
         <module>service-base</module>
         <module>service-core</module>
         <module>service-sms</module>
+        <module>service-oss</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -38,7 +39,7 @@
         <json.version>20170516</json.version>
         <aliyun-java-sdk-core.version>4.6.0</aliyun-java-sdk-core.version>
         <aliyun-java-sdk-dysmsapi.version>2.2.1</aliyun-java-sdk-dysmsapi.version>
-        <aliyun-sdk-oss.version>3.10.2</aliyun-sdk-oss.version>
+        <aliyun-sdk-oss.version>3.17.4</aliyun-sdk-oss.version>
         <jodatime.version>2.10.1</jodatime.version>
         <jwt.version>0.7.0</jwt.version>
         <httpclient.version>4.5.1</httpclient.version>

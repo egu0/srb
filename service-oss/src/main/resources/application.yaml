@@ -1,0 +1,17 @@
+server:
+  port: 8130
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: service-oss
+
+aliyun:
+  oss:
+    # endpoint 無需添加 https:// 前綴，且無需 / 後綴，示例： oss-cn-hangzhou.aliyuncs.com
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    keyId:
+    keySecret:
+    bucketName:
+
