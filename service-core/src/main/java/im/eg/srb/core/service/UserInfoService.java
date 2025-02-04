@@ -1,8 +1,10 @@
 package im.eg.srb.core.service;
 
-import im.eg.srb.core.pojo.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.vo.LoginVO;
 import im.eg.srb.core.pojo.vo.RegisterVO;
+import im.eg.srb.core.pojo.vo.UserInfoVO;
 
 /**
  * <p>
@@ -14,5 +16,13 @@ import im.eg.srb.core.pojo.vo.RegisterVO;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
+    /**
+     * 用戶註冊
+     */
     void register(RegisterVO registerVO);
+
+    /**
+     * 用戶登錄
+     */
+    UserInfoVO login(LoginVO loginVO, String ip);
 }

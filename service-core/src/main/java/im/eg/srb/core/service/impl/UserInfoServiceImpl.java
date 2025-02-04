@@ -5,11 +5,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
 import im.eg.common.result.ResponseEnum;
 import im.eg.common.util.MD5;
+import im.eg.srb.base.util.JwtUtils;
 import im.eg.srb.core.mapper.UserAccountMapper;
 import im.eg.srb.core.mapper.UserInfoMapper;
+import im.eg.srb.core.mapper.UserLoginRecordMapper;
 import im.eg.srb.core.pojo.entity.UserAccount;
 import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.entity.UserLoginRecord;
+import im.eg.srb.core.pojo.vo.LoginVO;
 import im.eg.srb.core.pojo.vo.RegisterVO;
+import im.eg.srb.core.pojo.vo.UserInfoVO;
 import im.eg.srb.core.service.UserInfoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +33,8 @@ import javax.annotation.Resource;
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
     @Resource
     private UserAccountMapper userAccountMapper;
+    @Resource
+    private UserLoginRecordMapper userLoginRecordMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,5 +60,45 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         UserAccount userAccount = new UserAccount();
         userAccount.setUserId(userInfo.getId());
         userAccountMapper.insert(userAccount);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public UserInfoVO login(LoginVO loginVO, String ip) {
+        String mobile = loginVO.getMobile();
+        String password = loginVO.getPassword();
+        Integer userType = loginVO.getUserType();
+        // 判斷用戶是否存在
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_type", userType);
+        queryWrapper.eq("mobile", mobile);
+        UserInfo userInfo = baseMapper.selectOne(queryWrapper);
+        Assert.notNull(userInfo, ResponseEnum.LOGIN_MOBILE_ERROR);
+
+        // 判斷密碼是否正確
+        String realPassword = userInfo.getPassword();
+        Assert.equals(realPassword, MD5.encrypt(password), ResponseEnum.LOGIN_PASSWORD_ERROR);
+
+        // 判斷用戶是否被禁用
+        Assert.equals(UserInfo.STATUS_NORMAL, userInfo.getStatus(), ResponseEnum.LOGIN_LOCKED_ERROR);
+
+        // 紀錄登錄日誌
+        UserLoginRecord userLoginRecord = new UserLoginRecord();
+        userLoginRecord.setUserId(userInfo.getId());
+        userLoginRecord.setIp(ip);
+        userLoginRecordMapper.insert(userLoginRecord);
+
+        // 生成 JWT
+        String token = JwtUtils.createToken(userInfo.getId(), userInfo.getName());
+
+        // 組裝 UserInfoVO
+        UserInfoVO userInfoVO = new UserInfoVO();
+        userInfoVO.setToken(token);
+        userInfoVO.setName(userInfo.getName());
+        userInfoVO.setMobile(userInfo.getMobile());
+        userInfoVO.setNickName(userInfo.getNickName());
+        userInfoVO.setUserType(userInfo.getUserType());
+        userInfoVO.setHeadImg(userInfo.getHeadImg());
+        return userInfoVO;
     }
 }
