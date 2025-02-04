@@ -5,6 +5,7 @@ import im.eg.common.exception.Assert;
 import im.eg.common.result.R;
 import im.eg.common.result.ResponseEnum;
 import im.eg.common.util.RegexValidateUtils;
+import im.eg.srb.base.util.JwtUtils;
 import im.eg.srb.core.pojo.vo.LoginVO;
 import im.eg.srb.core.pojo.vo.RegisterVO;
 import im.eg.srb.core.pojo.vo.UserInfoVO;
@@ -78,4 +79,15 @@ public class UserInfoController {
         return R.ok().data("userInfo", userInfoVO);
     }
 
+    @ApiOperation("校驗令牌")
+    @GetMapping("/checkToken")
+    public R checkToken(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        boolean valid = JwtUtils.checkToken(token);
+        if (valid) {
+            return R.ok();
+        } else {
+            return R.setResult(ResponseEnum.LOGIN_AUTH_ERROR);
+        }
+    }
 }
