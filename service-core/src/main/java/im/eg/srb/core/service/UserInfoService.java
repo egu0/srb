@@ -2,6 +2,7 @@ package im.eg.srb.core.service;
 
 import im.eg.srb.core.pojo.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.vo.RegisterVO;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserInfoService extends IService<UserInfo> {
 
+    void register(RegisterVO registerVO);
 }

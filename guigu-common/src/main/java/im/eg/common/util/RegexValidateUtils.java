@@ -9,7 +9,12 @@ import java.util.regex.Pattern;
 public class RegexValidateUtils {
 
     static boolean flag = false;
-    static String regex = "";
+
+    public static boolean checkPassword(String password) {
+        // 長度不小於六且同時包含數字和字母
+        String regex = "^(?=.*\\d)(?=.*[A-Za-z]).{6,}$";
+        return check(password, regex);
+    }
 
     public static boolean check(String str, String regex) {
         try {
