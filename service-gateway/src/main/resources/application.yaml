@@ -1,0 +1,17 @@
+server:
+  port: 5047
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: service-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    gateway:
+      discovery:
+        locator:
+          # 發現 nacos 中的微服務，並自動生成轉發路由
+          enabled: true
