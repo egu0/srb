@@ -6,6 +6,11 @@ spring:
     active: dev
   application:
     name: service-sms
+  cloud:
+    nacos:
+      discovery:
+        # nacos 服務地址
+        server-addr: localhost:8848
   redis:
     host: 127.0.0.1
     port: 6379
