@@ -15,3 +15,17 @@ spring:
         locator:
           # 發現 nacos 中的微服務，並自動生成轉發路由
           enabled: true
+      routes:
+        - id: service-core
+          uri: lb://service-core
+          predicates:
+            # 如果路徑中包含`/core/`，那麼將路由轉發到 service-core 服務
+            - Path=/*/core/**
+        - id: service-sms
+          uri: lb://service-sms
+          predicates:
+            - Path=/*/sms/**
+        - id: service-oss
+          uri: lb://service-oss
+          predicates:
+            - Path=/*/oss/**
