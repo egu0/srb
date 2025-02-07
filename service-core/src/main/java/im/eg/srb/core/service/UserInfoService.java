@@ -33,4 +33,9 @@ public interface UserInfoService extends IService<UserInfo> {
      * 「管理系統」分頁查詢會員列表
      */
     IPage<UserInfo> listPage(Page<UserInfo> userInfoPage, UserInfoQuery userInfoQuery);
+
+    /**
+     * 用戶鎖定與解鎖
+     */
+    void lock(Long id, Integer status);
 }

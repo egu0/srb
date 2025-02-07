@@ -45,7 +45,8 @@ public class ApiSmsController {
         Map<String, Object> params = new HashMap<>();
         String code = RandomUtils.getFourBitRandom();
         params.put("code", code);
-        smsService.send(mobile, SmsProperties.TEMPLATE_CODE, params);
+//        TODO: 生產環境需要放開這裡喔
+//        smsService.send(mobile, SmsProperties.TEMPLATE_CODE, params);
 
         // 將驗證碼放入緩存
         redisTemplate.opsForValue().set("srb:sms:code:" + mobile, code, 5, TimeUnit.MINUTES);

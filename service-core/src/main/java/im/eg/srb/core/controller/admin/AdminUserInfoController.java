@@ -47,4 +47,15 @@ public class AdminUserInfoController {
         IPage<UserInfo> pageModel = userInfoService.listPage(userInfoPage, userInfoQuery);
         return R.ok().data("pageModel", pageModel);
     }
+
+    @ApiOperation("鎖定和解鎖")
+    @PutMapping("/lock/{id}/{status}")
+    public R lock(
+            @ApiParam(value = "用戶 ID", required = true)
+            @PathVariable Long id,
+            @ApiParam(value = "鎖定狀態（0：鎖定 1：正常）", required = true)
+            @PathVariable Integer status) {
+        userInfoService.lock(id, status);
+        return R.ok().message(status == 1 ? "解鎖成功" : "鎖定成功");
+    }
 }
