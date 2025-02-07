@@ -30,11 +30,16 @@ spring:
         min-idle: 0
 
 feign:
+  sentinel:
+    # 開啟 OpenFeign 對 Sentinel 對支持
+    enabled: true
   client:
     config:
       default:
-        connectTimeout: 100000 # 連接超時時間，10s
-        readTimeout: 600000 # 執行超時時間，60s
+        # 連接超時時間，10s
+        connectTimeout: 100000
+        # 執行超時時間，60s
+        readTimeout: 600000
 
 logging:
   level:
