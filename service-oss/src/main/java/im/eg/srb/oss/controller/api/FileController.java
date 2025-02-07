@@ -15,7 +15,6 @@ import javax.annotation.Resource;
 import java.io.IOException;
 
 @Slf4j
-@CrossOrigin
 @RestController
 @Api(tags = "文件管理")
 @RequestMapping("/api/oss")

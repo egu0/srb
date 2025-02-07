@@ -31,7 +31,6 @@ import java.util.List;
  */
 @Api(tags = "數據字典管理")
 @Slf4j
-@CrossOrigin
 @RestController
 @RequestMapping("/admin/core/dict")
 public class AdminDictController {

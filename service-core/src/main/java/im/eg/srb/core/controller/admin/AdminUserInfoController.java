@@ -24,7 +24,6 @@ import javax.annotation.Resource;
  * @since 2024-11-23
  */
 @Slf4j
-@CrossOrigin
 @RestController
 @Api(tags = "會員管理")
 @RequestMapping("/admin/core/userInfo")
