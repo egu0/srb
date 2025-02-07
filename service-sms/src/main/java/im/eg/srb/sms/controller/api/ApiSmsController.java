@@ -5,8 +5,8 @@ import im.eg.common.result.R;
 import im.eg.common.result.ResponseEnum;
 import im.eg.common.util.RandomUtils;
 import im.eg.common.util.RegexValidateUtils;
+import im.eg.srb.sms.openfeign.CoreUserInfoClient;
 import im.eg.srb.sms.service.SmsService;
-import im.eg.srb.sms.util.SmsProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -27,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 public class ApiSmsController {
 
     @Resource
+    private CoreUserInfoClient coreUserInfoClient;
+
+    @Resource
     private SmsService smsService;
 
     @Resource
@@ -40,6 +43,10 @@ public class ApiSmsController {
         // 做校驗
         Assert.notEmpty(mobile, ResponseEnum.MOBILE_NULL_ERROR);
         Assert.isTrue(RegexValidateUtils.checkCellphone(mobile), ResponseEnum.MOBILE_ERROR);
+
+        // 通過 OpenFeign 調用「service-core」微服務中的接口判斷手機號是否已註冊
+        R mobileRegisterStatus = coreUserInfoClient.checkMobileRegisterStatus(mobile);
+        Assert.equals(mobileRegisterStatus.getData().get("exist"), false, ResponseEnum.MOBILE_EXIST_ERROR);
 
         // 發送短信
         Map<String, Object> params = new HashMap<>();

@@ -29,6 +29,13 @@ spring:
         # 最小空閒連結，默認 8
         min-idle: 0
 
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 100000 # 連接超時時間，10s
+        readTimeout: 600000 # 執行超時時間，60s
+
 aliyun:
   sms:
     region-id: cn-hangzhou-finance
