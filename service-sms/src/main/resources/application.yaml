@@ -36,6 +36,10 @@ feign:
         connectTimeout: 100000 # 連接超時時間，10s
         readTimeout: 600000 # 執行超時時間，60s
 
+logging:
+  level:
+    im.eg.srb.sms.openfeign.CoreUserInfoClient: DEBUG
+
 aliyun:
   sms:
     region-id: cn-hangzhou-finance
