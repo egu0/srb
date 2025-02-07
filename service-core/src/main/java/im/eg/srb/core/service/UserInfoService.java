@@ -38,4 +38,12 @@ public interface UserInfoService extends IService<UserInfo> {
      * 用戶鎖定與解鎖
      */
     void lock(Long id, Integer status);
+
+    /**
+     * 校驗手機號註冊狀態
+     *
+     * @param mobile 手機號
+     * @return true 表示已註冊；false 表示未註冊
+     */
+    boolean checkMobileRegisterStatus(String mobile);
 }

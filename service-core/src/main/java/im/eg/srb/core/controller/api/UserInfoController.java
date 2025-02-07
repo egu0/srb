@@ -90,4 +90,11 @@ public class UserInfoController {
             return R.setResult(ResponseEnum.LOGIN_AUTH_ERROR);
         }
     }
+
+    @ApiOperation("檢查手機號是否已經被註冊")
+    @GetMapping("/checkMobileRegStatus/{mobile}")
+    public R checkMobileRegisterStatus(@PathVariable String mobile) {
+        Assert.isTrue(RegexValidateUtils.checkCellphone(mobile), ResponseEnum.MOBILE_ERROR);
+        return R.ok().data("exist", userInfoService.checkMobileRegisterStatus(mobile));
+    }
 }
