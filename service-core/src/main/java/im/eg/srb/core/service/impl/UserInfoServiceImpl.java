@@ -1,6 +1,9 @@
 package im.eg.srb.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
 import im.eg.common.result.ResponseEnum;
@@ -12,6 +15,7 @@ import im.eg.srb.core.mapper.UserLoginRecordMapper;
 import im.eg.srb.core.pojo.entity.UserAccount;
 import im.eg.srb.core.pojo.entity.UserInfo;
 import im.eg.srb.core.pojo.entity.UserLoginRecord;
+import im.eg.srb.core.pojo.query.UserInfoQuery;
 import im.eg.srb.core.pojo.vo.LoginVO;
 import im.eg.srb.core.pojo.vo.RegisterVO;
 import im.eg.srb.core.pojo.vo.UserInfoVO;
@@ -100,5 +104,24 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfoVO.setUserType(userInfo.getUserType());
         userInfoVO.setHeadImg(userInfo.getHeadImg());
         return userInfoVO;
+    }
+
+    @Override
+    public IPage<UserInfo> listPage(Page<UserInfo> userInfoPage,
+                                    UserInfoQuery userInfoQuery) {
+
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+
+        if (userInfoQuery != null) {
+            String mobile = userInfoQuery.getMobile();
+            Integer userType = userInfoQuery.getUserType();
+            Integer status = userInfoQuery.getStatus();
+
+            queryWrapper.eq(StringUtils.isNotBlank(mobile), "mobile", mobile);
+            queryWrapper.eq(userType != null, "user_type", userType);
+            queryWrapper.eq(status != null, "status", status);
+        }
+
+        return baseMapper.selectPage(userInfoPage, queryWrapper);
     }
 }
