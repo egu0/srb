@@ -58,8 +58,13 @@ public class UserBindController {
         log.info("帳戶綁定異步回調處理接口接收的參數為: {}", JSON.toJSONString(params));
 
         if (!RequestHelper.isSignEquals(params)) {
-            log.error("用戶帳號綁定異步回調處理接口簽名校驗失敗 {}", JSON.toJSONString(params));
+            log.error("用戶帳號綁定異步回調處理接口 - 簽名校驗失敗 {}", JSON.toJSONString(params));
             return "fail";
+        }
+
+        String resultCode = (String) params.get("resultCode");
+        if (!"0001".equals(resultCode)) {
+            log.error("用戶帳號綁定異步回調處理接口 - 綁定失敗 {}", JSON.toJSONString(params));
         }
 
         userBindService.notify(params);
