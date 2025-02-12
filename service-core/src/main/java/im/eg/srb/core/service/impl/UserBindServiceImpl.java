@@ -1,6 +1,10 @@
 package im.eg.srb.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.common.exception.Assert;
+import im.eg.common.result.ResponseEnum;
+import im.eg.srb.core.enums.UserBindEnum;
 import im.eg.srb.core.hfb.FormHelper;
 import im.eg.srb.core.hfb.HfbConst;
 import im.eg.srb.core.hfb.RequestHelper;
@@ -8,6 +12,7 @@ import im.eg.srb.core.mapper.UserBindMapper;
 import im.eg.srb.core.pojo.entity.UserBind;
 import im.eg.srb.core.pojo.vo.UserBindVO;
 import im.eg.srb.core.service.UserBindService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -26,6 +31,30 @@ public class UserBindServiceImpl extends ServiceImpl<UserBindMapper, UserBind> i
 
     @Override
     public String commitBindUser(UserBindVO userBindVO, Long userId) {
+
+        // 如果 idCard 已經被綁定，且 userId 不一致，則不被允許
+        QueryWrapper<UserBind> userBindQueryWrapper = new QueryWrapper<>();
+        userBindQueryWrapper.eq("id_card", userBindVO.getIdCard())
+                .ne("user_id", userId);
+        UserBind existedUserBind = baseMapper.selectOne(userBindQueryWrapper);
+        Assert.isNull(existedUserBind, ResponseEnum.USER_BIND_ID_EXIST_ERROR);
+
+        // 創建或修改用戶綁定記錄
+        userBindQueryWrapper = new QueryWrapper<>();
+        userBindQueryWrapper.eq("user_id", userId);
+        existedUserBind = baseMapper.selectOne(userBindQueryWrapper);
+        if (existedUserBind != null) {
+            BeanUtils.copyProperties(userBindVO, existedUserBind);
+            baseMapper.updateById(existedUserBind);
+        } else {
+            UserBind userBind = new UserBind();
+            BeanUtils.copyProperties(userBindVO, userBind);
+            userBind.setUserId(userId);
+            userBind.setStatus(UserBindEnum.NO_BIND.getStatus());
+            baseMapper.insert(userBind);
+        }
+
+        // 組裝參數集合
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("agentId", HfbConst.AGENT_ID); // 商戶 ID
         paramMap.put("agentUserId", userId); // 商戶系統中的會員 ID
