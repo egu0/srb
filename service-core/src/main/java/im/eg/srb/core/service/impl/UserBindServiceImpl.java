@@ -9,12 +9,16 @@ import im.eg.srb.core.hfb.FormHelper;
 import im.eg.srb.core.hfb.HfbConst;
 import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.mapper.UserBindMapper;
+import im.eg.srb.core.mapper.UserInfoMapper;
 import im.eg.srb.core.pojo.entity.UserBind;
+import im.eg.srb.core.pojo.entity.UserInfo;
 import im.eg.srb.core.pojo.vo.UserBindVO;
 import im.eg.srb.core.service.UserBindService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +32,9 @@ import java.util.Map;
  */
 @Service
 public class UserBindServiceImpl extends ServiceImpl<UserBindMapper, UserBind> implements UserBindService {
+
+    @Resource
+    private UserInfoMapper userInfoMapper;
 
     @Override
     public String commitBindUser(UserBindVO userBindVO, Long userId) {
@@ -72,5 +79,28 @@ public class UserBindServiceImpl extends ServiceImpl<UserBindMapper, UserBind> i
         paramMap.put("sign", RequestHelper.getSign(paramMap)); // 計算簽名
 
         return FormHelper.buildForm(HfbConst.USER_BIND_URL, paramMap);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void notify(Map<String, Object> params) {
+        String bindCode = (String) params.get("bindCode");
+        String userId = (String) params.get("agentUserId");
+
+        // 更新 user_bind 表
+        QueryWrapper<UserBind> userBindQueryWrapper = new QueryWrapper<>();
+        userBindQueryWrapper.eq("user_id", userId);
+        UserBind userBind = baseMapper.selectOne(userBindQueryWrapper);
+        userBind.setBindCode(bindCode);
+        userBind.setStatus(UserBindEnum.BIND_OK.getStatus());
+        baseMapper.updateById(userBind);
+
+        // 更新 user_info 表
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+        userInfo.setBindCode(bindCode);
+        userInfo.setName(userBind.getName());
+        userInfo.setIdCard(userBind.getIdCard());
+        userInfo.setBindStatus(UserBindEnum.BIND_OK.getStatus());
+        userInfoMapper.updateById(userInfo);
     }
 }

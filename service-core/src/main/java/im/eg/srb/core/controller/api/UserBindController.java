@@ -1,8 +1,10 @@
 package im.eg.srb.core.controller.api;
 
 
+import com.alibaba.fastjson.JSON;
 import im.eg.common.result.R;
 import im.eg.srb.base.util.JwtUtils;
+import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.pojo.vo.UserBindVO;
 import im.eg.srb.core.service.UserBindService;
 import io.swagger.annotations.Api;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * <p>
@@ -45,6 +48,24 @@ public class UserBindController {
         String formStr = userBindService.commitBindUser(userBindVO, userId);
 
         return R.ok().data("formStr", formStr);
+    }
+
+    @ApiOperation("帳戶綁定異步回調處理")
+    @PostMapping("/notify")
+    public String notify(HttpServletRequest request) {
+        // 「匯付寶系統」發送請求傳遞的參數
+        Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
+        log.info("帳戶綁定異步回調處理接口接收的參數為: {}", JSON.toJSONString(params));
+
+        if (!RequestHelper.isSignEquals(params)) {
+            log.error("用戶帳號綁定異步回調處理接口簽名校驗失敗 {}", JSON.toJSONString(params));
+            return "fail";
+        }
+
+        userBindService.notify(params);
+
+        // 返回 success 給「匯付寶系統」時表示成功；如果返回別的，那麼「匯付寶系統」會進行重試
+        return "success";
     }
 
 }
