@@ -1,7 +1,8 @@
 package im.eg.srb.core.service;
 
-import im.eg.srb.core.pojo.entity.UserBind;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.entity.UserBind;
+import im.eg.srb.core.pojo.vo.UserBindVO;
 
 /**
  * <p>
@@ -13,4 +14,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserBindService extends IService<UserBind> {
 
+    /**
+     * 組裝表單字符串
+     */
+    String commitBindUser(UserBindVO userBindVO, Long userId);
 }
