@@ -1,10 +1,21 @@
 package im.eg.srb.core.service.impl;
 
-import im.eg.srb.core.pojo.entity.Borrower;
-import im.eg.srb.core.mapper.BorrowerMapper;
-import im.eg.srb.core.service.BorrowerService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.srb.core.enums.BorrowerStatusEnum;
+import im.eg.srb.core.mapper.BorrowerAttachMapper;
+import im.eg.srb.core.mapper.BorrowerMapper;
+import im.eg.srb.core.mapper.UserInfoMapper;
+import im.eg.srb.core.pojo.entity.Borrower;
+import im.eg.srb.core.pojo.entity.BorrowerAttach;
+import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.vo.BorrowerVO;
+import im.eg.srb.core.service.BorrowerService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +28,41 @@ import org.springframework.stereotype.Service;
 @Service
 public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> implements BorrowerService {
 
+    @Resource
+    private UserInfoMapper userInfoMapper;
+
+    @Resource
+    private BorrowerAttachMapper borrowerAttachMapper;
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveBorrowerVOByUserId(BorrowerVO borrowerVO, Long userId) {
+        // 获取用户基本信息
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+        if (userInfo == null) {
+            log.error("保存借款人信息：未查询到 userId=" + userId + " 的用户");
+            return;
+        }
+
+        // 保存借款人信息
+        Borrower borrower = new Borrower();
+        BeanUtils.copyProperties(borrowerVO, borrower);
+        borrower.setUserId(userId);
+        borrower.setName(userInfo.getName());
+        borrower.setIdCard(userInfo.getIdCard());
+        borrower.setMobile(userInfo.getMobile());
+        borrower.setStatus(BorrowerStatusEnum.AUTH_RUN.getStatus()); // 认证中
+        baseMapper.insert(borrower);
+
+        // 保存附件
+        List<BorrowerAttach> borrowerAttachList = borrowerVO.getBorrowerAttachList();
+        borrowerAttachList.forEach(borrowerAttach -> {
+            borrowerAttach.setBorrowerId(borrower.getId());
+            borrowerAttachMapper.insert(borrowerAttach);
+        });
+
+        // 更新 user_info 中的【借款人认证状态】
+        userInfo.setBorrowAuthStatus(BorrowerStatusEnum.AUTH_RUN.getStatus());
+        userInfoMapper.updateById(userInfo);
+    }
 }

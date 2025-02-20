@@ -2,6 +2,7 @@ package im.eg.srb.core.service;
 
 import im.eg.srb.core.pojo.entity.Borrower;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.vo.BorrowerVO;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface BorrowerService extends IService<Borrower> {
 
+    void saveBorrowerVOByUserId(BorrowerVO borrowerVO, Long userId);
 }
