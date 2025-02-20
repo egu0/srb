@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -87,6 +88,18 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
         }
 
         return dictList;
+    }
+
+    @Override
+    public List<Dict> findByDictCode(String dictCode) {
+        QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dict_code", dictCode);
+        Dict dict = baseMapper.selectOne(queryWrapper);
+        if (dict == null) {
+            return Collections.emptyList();
+        } else {
+            return listByParentId(dict.getId());
+        }
     }
 
     /**
