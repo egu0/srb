@@ -15,4 +15,6 @@ import im.eg.srb.core.pojo.vo.BorrowerVO;
 public interface BorrowerService extends IService<Borrower> {
 
     void saveBorrowerVOByUserId(BorrowerVO borrowerVO, Long userId);
+
+    Integer getBorrowerStatus(Long userId);
 }

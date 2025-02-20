@@ -1,5 +1,6 @@
 package im.eg.srb.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.srb.core.enums.BorrowerStatusEnum;
 import im.eg.srb.core.mapper.BorrowerAttachMapper;
@@ -64,5 +65,18 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
         // 更新 user_info 中的【借款人认证状态】
         userInfo.setBorrowAuthStatus(BorrowerStatusEnum.AUTH_RUN.getStatus());
         userInfoMapper.updateById(userInfo);
+    }
+
+    @Override
+    public Integer getBorrowerStatus(Long userId) {
+        QueryWrapper<Borrower> borrowerQueryWrapper = new QueryWrapper<>();
+        borrowerQueryWrapper
+                .select("status")
+                .eq("user_id", userId);
+        List<Object> objects = baseMapper.selectObjs(borrowerQueryWrapper);
+        if (objects == null || objects.isEmpty()) {
+            return BorrowerStatusEnum.NO_AUTH.getStatus();
+        }
+        return (Integer) objects.get(0);
     }
 }
