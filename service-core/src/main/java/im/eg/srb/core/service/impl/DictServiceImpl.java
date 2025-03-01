@@ -102,6 +102,21 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
         }
     }
 
+    @Override
+    public String getDictName(String parentCode, Integer dictValue) {
+        QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dict_code", parentCode);
+        Dict parentDict = baseMapper.selectOne(queryWrapper);
+        if (parentDict == null) {
+            return "";
+        }
+        queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", parentDict.getId())
+                .eq("value", dictValue);
+        Dict dict = baseMapper.selectOne(queryWrapper);
+        return dict == null ? "" : dict.getName();
+    }
+
     /**
      * 判斷當前節點是否有子節點
      *

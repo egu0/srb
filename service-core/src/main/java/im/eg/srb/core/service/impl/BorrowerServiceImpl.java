@@ -11,8 +11,11 @@ import im.eg.srb.core.mapper.UserInfoMapper;
 import im.eg.srb.core.pojo.entity.Borrower;
 import im.eg.srb.core.pojo.entity.BorrowerAttach;
 import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.pojo.vo.BorrowerVO;
+import im.eg.srb.core.service.BorrowerAttachService;
 import im.eg.srb.core.service.BorrowerService;
+import im.eg.srb.core.service.DictService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +40,12 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
 
     @Resource
     private BorrowerAttachMapper borrowerAttachMapper;
+
+    @Resource
+    private DictService dictService;
+
+    @Resource
+    private BorrowerAttachService borrowerAttachService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -93,5 +102,34 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
                     .orderByDesc("id");
         }
         return baseMapper.selectPage(pageParam, queryWrapper);
+    }
+
+    @Override
+    public BorrowerDetailVO getBorrowerDetailVOByUserId(Long userId) {
+
+        BorrowerDetailVO borrowerDetailVO = new BorrowerDetailVO();
+
+        // 填充基本信息
+        Borrower borrower = baseMapper.selectById(userId);
+        BeanUtils.copyProperties(borrower, borrowerDetailVO);
+
+        // 填充特殊信息
+        borrowerDetailVO.setMarry(borrower.getMarry() ? "已婚" : "未婚");
+        borrowerDetailVO.setSex(borrower.getSex() == 1 ? "男" : "女");
+
+        // 下拉列表
+        borrowerDetailVO.setEducation(dictService.getDictName("education", borrower.getEducation()));
+        borrowerDetailVO.setIncome(dictService.getDictName("income", borrower.getIncome()));
+        borrowerDetailVO.setIndustry(dictService.getDictName("industry", borrower.getIndustry()));
+        borrowerDetailVO.setReturnSource(dictService.getDictName("returnSource", borrower.getReturnSource()));
+        borrowerDetailVO.setContactsRelation(dictService.getDictName("relation", borrower.getContactsRelation()));
+
+        // 状态
+        borrowerDetailVO.setStatus(BorrowerStatusEnum.getMsgByStatus(borrower.getStatus()));
+
+        // 附件列表
+        borrowerDetailVO.setBorrowerAttachVOList(borrowerAttachService.selectBorrowerAttachVOList(borrower.getId()));
+
+        return borrowerDetailVO;
     }
 }

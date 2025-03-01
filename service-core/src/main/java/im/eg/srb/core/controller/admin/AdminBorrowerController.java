@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import im.eg.common.result.R;
 import im.eg.srb.core.pojo.entity.Borrower;
+import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.service.BorrowerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +45,13 @@ public class AdminBorrowerController {
         Page<Borrower> pageParam = new Page<>(page, limit);
         IPage<Borrower> listModel = borrowerService.listPage(pageParam, keyword);
         return R.ok().data("list", listModel);
+    }
+
+    @ApiOperation("获取借款人详细信息")
+    @GetMapping("/detail/{userId}")
+    public R detail(@ApiParam(value = "用户 id", required = true) @PathVariable Long userId) {
+        BorrowerDetailVO vo = borrowerService.getBorrowerDetailVOByUserId(userId);
+        return R.ok().data("detail", vo);
     }
 
 }

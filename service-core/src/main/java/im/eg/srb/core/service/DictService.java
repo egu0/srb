@@ -27,4 +27,12 @@ public interface DictService extends IService<Dict> {
     List<Dict> listByParentId(Long parentId);
 
     List<Dict> findByDictCode(String dictCode);
+
+    /**
+     * 查询字典项的名称，
+     *
+     * @param parentCode 父级别字典项的 dict_code 字段
+     * @param dictValue  字典项值
+     */
+    String getDictName(String parentCode, Integer dictValue);
 }
