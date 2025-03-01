@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import im.eg.srb.core.pojo.entity.Borrower;
+import im.eg.srb.core.pojo.vo.BorrowerApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.pojo.vo.BorrowerVO;
 
@@ -29,5 +30,10 @@ public interface BorrowerService extends IService<Borrower> {
     /**
      * 获取借款人详细信息
      */
-    BorrowerDetailVO getBorrowerDetailVOByUserId(Long userId);
+    BorrowerDetailVO getBorrowerDetailVOByBorrowerId(Long borrowerId);
+
+    /**
+     * 借款额度审批
+     */
+    void approval(BorrowerApprovalVO borrowerApprovalVO);
 }

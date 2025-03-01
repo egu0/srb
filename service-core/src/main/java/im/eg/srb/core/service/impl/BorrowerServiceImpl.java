@@ -7,12 +7,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
 import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.enums.BorrowerStatusEnum;
+import im.eg.srb.core.enums.IntegralEnum;
 import im.eg.srb.core.mapper.BorrowerAttachMapper;
 import im.eg.srb.core.mapper.BorrowerMapper;
 import im.eg.srb.core.mapper.UserInfoMapper;
+import im.eg.srb.core.mapper.UserIntegralMapper;
 import im.eg.srb.core.pojo.entity.Borrower;
 import im.eg.srb.core.pojo.entity.BorrowerAttach;
 import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.entity.UserIntegral;
+import im.eg.srb.core.pojo.vo.BorrowerApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.pojo.vo.BorrowerVO;
 import im.eg.srb.core.service.BorrowerAttachService;
@@ -48,6 +52,9 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
 
     @Resource
     private BorrowerAttachService borrowerAttachService;
+
+    @Resource
+    private UserIntegralMapper userIntegralMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -107,12 +114,12 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
     }
 
     @Override
-    public BorrowerDetailVO getBorrowerDetailVOByUserId(Long userId) {
+    public BorrowerDetailVO getBorrowerDetailVOByBorrowerId(Long borrowerId) {
 
         BorrowerDetailVO borrowerDetailVO = new BorrowerDetailVO();
 
         // 填充基本信息
-        Borrower borrower = baseMapper.selectById(userId);
+        Borrower borrower = baseMapper.selectById(borrowerId);
         Assert.notNull(borrower, ResponseEnum.BORROWER_NOT_EXIST);
         BeanUtils.copyProperties(borrower, borrowerDetailVO);
 
@@ -134,5 +141,73 @@ public class BorrowerServiceImpl extends ServiceImpl<BorrowerMapper, Borrower> i
         borrowerDetailVO.setBorrowerAttachVOList(borrowerAttachService.selectBorrowerAttachVOList(borrower.getId()));
 
         return borrowerDetailVO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void approval(BorrowerApprovalVO borrowerApprovalVO) {
+        // 获取「借款额度申请」数据
+        Long borrowerId = borrowerApprovalVO.getBorrowerId();
+        Borrower borrower = baseMapper.selectById(borrowerId);
+        if (borrower == null) {
+            return;
+        }
+
+        // 获取「user-info」表中的用户积分
+        Long userId = borrower.getUserId();
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+        Integer currentIntegral = userInfo.getIntegral();
+        if (currentIntegral == null || currentIntegral < 0) {
+            currentIntegral = 0;
+        }
+        currentIntegral += borrowerApprovalVO.getInfoIntegral();
+
+        // 向「user-integral 表」中插入「基本信息」积分数据
+        UserIntegral userIntegral = buildUserIntegralEntity(userId, borrowerApprovalVO.getInfoIntegral(),
+                "借款人基本信息");
+        userIntegralMapper.insert(userIntegral);
+
+        // 根据用户基本信息添加对应积分项
+        if (borrowerApprovalVO.getIsIdCardOk()) {
+            userIntegral = buildUserIntegralEntity(userId, IntegralEnum.BORROWER_ID_CARD.getIntegral(),
+                    IntegralEnum.BORROWER_ID_CARD.getMsg());
+            userIntegralMapper.insert(userIntegral);
+            currentIntegral += IntegralEnum.BORROWER_ID_CARD.getIntegral();
+        }
+
+        // 根据房产信息添加对应积分项
+        if (borrowerApprovalVO.getIsHouseOk()) {
+            userIntegral = buildUserIntegralEntity(userId, IntegralEnum.BORROWER_HOUSE.getIntegral(),
+                    IntegralEnum.BORROWER_HOUSE.getMsg());
+            userIntegralMapper.insert(userIntegral);
+            currentIntegral += IntegralEnum.BORROWER_HOUSE.getIntegral();
+        }
+
+        // 根据车辆信息添加对应积分项
+        if (borrowerApprovalVO.getIsCarOk()) {
+            userIntegral = buildUserIntegralEntity(userId, IntegralEnum.BORROWER_CAR.getIntegral(),
+                    IntegralEnum.BORROWER_CAR.getMsg());
+            userIntegralMapper.insert(userIntegral);
+            currentIntegral += IntegralEnum.BORROWER_CAR.getIntegral();
+        }
+
+        // 更新「borrower 表」中记录的审核状态
+        Borrower updateStatusBorrower = new Borrower().setId(borrowerId)
+                .setStatus(borrowerApprovalVO.getStatus());
+        baseMapper.updateById(updateStatusBorrower);
+
+        // 更新「user-info 表」中用户的 用户积分 和 借款审核状态
+        UserInfo updateUserInfo = new UserInfo().setId(userId)
+                .setIntegral(currentIntegral)
+                .setBorrowAuthStatus(borrowerApprovalVO.getStatus());
+        userInfoMapper.updateById(updateUserInfo);
+    }
+
+    private static UserIntegral buildUserIntegralEntity(Long userId, Integer integral, String remark) {
+        UserIntegral userIntegral = new UserIntegral();
+        userIntegral.setUserId(userId);
+        userIntegral.setIntegral(integral);
+        userIntegral.setContent(remark);
+        return userIntegral;
     }
 }
