@@ -2,6 +2,11 @@ package im.eg.srb.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.common.exception.Assert;
+import im.eg.common.result.ResponseEnum;
+import im.eg.srb.core.enums.BorrowAuthEnum;
+import im.eg.srb.core.enums.BorrowInfoStatusEnum;
+import im.eg.srb.core.enums.UserBindEnum;
 import im.eg.srb.core.mapper.BorrowInfoMapper;
 import im.eg.srb.core.mapper.IntegralGradeMapper;
 import im.eg.srb.core.mapper.UserInfoMapper;
@@ -13,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * <p>
@@ -44,5 +50,30 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
         } else {
             return integralGrade.getBorrowAmount();
         }
+    }
+
+    @Override
+    public void saveBorrowInfo(BorrowInfo borrowInfo, Long userId) {
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+
+        // 判断：用户绑定状态
+        Assert.equals(UserBindEnum.BIND_OK.getStatus(), userInfo.getBindStatus(),
+                ResponseEnum.USER_NO_BIND_ERROR);
+
+        // 判断：借款人额度申请状态
+        Assert.equals(BorrowAuthEnum.AUTH_OK.getStatus(), userInfo.getBorrowAuthStatus(),
+                ResponseEnum.USER_NO_AMOUNT_ERROR);
+
+        // 判断：借款额度是否在正确区间内
+        BigDecimal maxBorrowAmount = this.getBorrowAmount(userId);
+        Assert.isTrue(maxBorrowAmount.compareTo(borrowInfo.getAmount()) >= 0,
+                ResponseEnum.USER_AMOUNT_LESS_ERROR);
+
+        // 借款申请
+        borrowInfo.setUserId(userId);
+        BigDecimal yearRate = borrowInfo.getBorrowYearRate().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
+        borrowInfo.setBorrowYearRate(yearRate);
+        borrowInfo.setStatus(BorrowInfoStatusEnum.CHECK_RUN.getStatus()); // 状态：审核中
+        baseMapper.insert(borrowInfo);
     }
 }

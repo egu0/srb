@@ -19,4 +19,9 @@ public interface BorrowInfoService extends IService<BorrowInfo> {
      * 获取用户借款额度
      */
     BigDecimal getBorrowAmount(Long userId);
+
+    /**
+     * 借款申请
+     */
+    void saveBorrowInfo(BorrowInfo borrowInfo, Long userId);
 }
