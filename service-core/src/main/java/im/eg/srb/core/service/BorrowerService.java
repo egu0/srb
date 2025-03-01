@@ -1,7 +1,9 @@
 package im.eg.srb.core.service;
 
-import im.eg.srb.core.pojo.entity.Borrower;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.entity.Borrower;
 import im.eg.srb.core.pojo.vo.BorrowerVO;
 
 /**
@@ -17,4 +19,9 @@ public interface BorrowerService extends IService<Borrower> {
     void saveBorrowerVOByUserId(BorrowerVO borrowerVO, Long userId);
 
     Integer getBorrowerStatus(Long userId);
+
+    /**
+     * 分页查询借款人额度审核列表
+     */
+    IPage<Borrower> listPage(Page<Borrower> pageParam, String keyword);
 }
