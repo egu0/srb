@@ -37,10 +37,8 @@ public class AdminBorrowerController {
     @GetMapping("/list/{page}/{limit}")
     public R listPage(@ApiParam(value = "当前页码", required = true)
                       @PathVariable Long page,
-
                       @ApiParam(value = "每页记录数", required = true)
                       @PathVariable Long limit,
-
                       @ApiParam(value = "查询关键字")
                       @RequestParam String keyword) {
         Page<Borrower> pageParam = new Page<>(page, limit);
