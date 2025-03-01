@@ -24,4 +24,9 @@ public interface BorrowInfoService extends IService<BorrowInfo> {
      * 借款申请
      */
     void saveBorrowInfo(BorrowInfo borrowInfo, Long userId);
+
+    /**
+     * 获取用户的借款状态
+     */
+    Integer getStatusByUserId(Long userId);
 }

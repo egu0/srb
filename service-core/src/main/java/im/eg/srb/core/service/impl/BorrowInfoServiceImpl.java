@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 /**
  * <p>
@@ -75,5 +76,17 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
         borrowInfo.setBorrowYearRate(yearRate);
         borrowInfo.setStatus(BorrowInfoStatusEnum.CHECK_RUN.getStatus()); // 状态：审核中
         baseMapper.insert(borrowInfo);
+    }
+
+    @Override
+    public Integer getStatusByUserId(Long userId) {
+        QueryWrapper<BorrowInfo> borrowInfoQueryWrapper = new QueryWrapper<>();
+        borrowInfoQueryWrapper.select("status").eq("user_id", userId);
+        List<Object> result = baseMapper.selectObjs(borrowInfoQueryWrapper);
+        if (!result.isEmpty()) {
+            return (Integer) result.get(0);
+        } else {
+            return BorrowInfoStatusEnum.NO_AUTH.getStatus(); // 未认证（未申请）
+        }
     }
 }
