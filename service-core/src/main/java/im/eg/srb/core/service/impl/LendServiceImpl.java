@@ -1,20 +1,28 @@
 package im.eg.srb.core.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.srb.core.enums.LendStatusEnum;
 import im.eg.srb.core.mapper.LendMapper;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
 import im.eg.srb.core.pojo.entity.Lend;
 import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
+import im.eg.srb.core.pojo.vo.LendVO;
+import im.eg.srb.core.service.DictService;
 import im.eg.srb.core.service.LendService;
 import im.eg.srb.core.util.LendNoUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -26,6 +34,9 @@ import java.time.format.DateTimeFormatter;
  */
 @Service
 public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements LendService {
+
+    @Resource
+    private DictService dictService;
 
     @Override
     public void createLend(BorrowInfoApprovalVO borrowInfoApprovalVO, BorrowInfo borrowInfo) {
@@ -59,6 +70,30 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
         lend.setCheckTime(LocalDateTime.now());
         lend.setCheckAdminId(1L); // 暂时忽略
         baseMapper.insert(lend);
+    }
+
+    @Override
+    public IPage<LendVO> listPage(Page<Lend> pageParam) {
+        Page<Lend> lendPage = baseMapper.selectPage(pageParam, null);
+        List<LendVO> records = lendPage.getRecords().stream()
+                .map(lend -> {
+                    LendVO lendVO = new LendVO();
+                    BeanUtils.copyProperties(lend, lendVO);
+                    lendVO.getParam().put("returnMethod",
+                            dictService.getDictName("returnMethod", lend.getReturnMethod()));
+                    lendVO.getParam().put("status",
+                            LendStatusEnum.getMsgByStatus(lend.getStatus()));
+                    return lendVO;
+                })
+                .collect(Collectors.toList());
+
+        Page<LendVO> lendVOPage = new Page<>();
+        lendVOPage.setRecords(records);
+        lendVOPage.setTotal(lendVOPage.getTotal());
+        lendVOPage.setPages(lendPage.getPages());
+        lendVOPage.setCurrent(lendPage.getCurrent());
+        lendVOPage.setSize(lendPage.getSize());
+        return lendVOPage;
     }
 
     private BigDecimal divide100(BigDecimal o) {
