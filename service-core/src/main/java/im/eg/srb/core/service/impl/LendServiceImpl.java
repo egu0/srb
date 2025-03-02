@@ -104,7 +104,7 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
 
         Page<LendVO> lendVOPage = new Page<>();
         lendVOPage.setRecords(records);
-        lendVOPage.setTotal(lendVOPage.getTotal());
+        lendVOPage.setTotal(lendPage.getTotal());
         lendVOPage.setPages(lendPage.getPages());
         lendVOPage.setCurrent(lendPage.getCurrent());
         lendVOPage.setSize(lendPage.getSize());
