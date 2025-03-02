@@ -8,6 +8,8 @@ import im.eg.srb.core.pojo.entity.Lend;
 import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.LendVO;
 
+import java.util.Map;
+
 /**
  * <p>
  * 标的准备表 服务类
@@ -27,4 +29,9 @@ public interface LendService extends IService<Lend> {
      * 查询标的分页列表
      */
     IPage<LendVO> listPage(Page<Lend> pageParam);
+
+    /**
+     * 获取标的详细信息
+     */
+    Map<String, Object> getLendDetail(Long lendId);
 }

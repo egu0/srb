@@ -1,14 +1,21 @@
 package im.eg.srb.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.common.exception.Assert;
+import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.enums.LendStatusEnum;
+import im.eg.srb.core.mapper.BorrowerMapper;
 import im.eg.srb.core.mapper.LendMapper;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
+import im.eg.srb.core.pojo.entity.Borrower;
 import im.eg.srb.core.pojo.entity.Lend;
 import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
+import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.pojo.vo.LendVO;
+import im.eg.srb.core.service.BorrowerService;
 import im.eg.srb.core.service.DictService;
 import im.eg.srb.core.service.LendService;
 import im.eg.srb.core.util.LendNoUtils;
@@ -21,7 +28,9 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +46,12 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
 
     @Resource
     private DictService dictService;
+
+    @Resource
+    private BorrowerMapper borrowerMapper;
+
+    @Resource
+    private BorrowerService borrowerService;
 
     @Override
     public void createLend(BorrowInfoApprovalVO borrowInfoApprovalVO, BorrowInfo borrowInfo) {
@@ -94,6 +109,32 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
         lendVOPage.setCurrent(lendPage.getCurrent());
         lendVOPage.setSize(lendPage.getSize());
         return lendVOPage;
+    }
+
+    @Override
+    public Map<String, Object> getLendDetail(Long lendId) {
+        // 组装 LendVO
+        Lend lend = baseMapper.selectById(lendId);
+        Assert.notNull(lend, ResponseEnum.LEND_NOT_EXIST);
+        LendVO lendVO = new LendVO();
+        BeanUtils.copyProperties(lend, lendVO);
+        lendVO.getParam().put("returnMethod",
+                dictService.getDictName("returnMethod", lend.getReturnMethod()));
+        lendVO.getParam().put("status",
+                LendStatusEnum.getMsgByStatus(lend.getStatus()));
+
+        // 获取 BorrowerDetailVO
+        Long userId = lend.getUserId();
+        QueryWrapper<Borrower> borrowerQueryWrapper = new QueryWrapper<>();
+        borrowerQueryWrapper.eq("user_id", userId);
+        Borrower borrower = borrowerMapper.selectOne(borrowerQueryWrapper);
+        BorrowerDetailVO borrowerDetailVO = borrowerService.getBorrowerDetailVOByBorrowerId(borrower.getId());
+
+        // 整合数据
+        Map<String, Object> data = new HashMap<>();
+        data.put("lend", lendVO);
+        data.put("borrower", borrowerDetailVO);
+        return data;
     }
 
     private BigDecimal divide100(BigDecimal o) {

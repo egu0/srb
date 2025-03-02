@@ -7,6 +7,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 该类是 Borrower 类的变体，用于和前台进行数据交互。记录字典值的字段类型在该类中为 String
+ */
 @Data
 @ApiModel(description = "借款人信息详情")
 public class BorrowerDetailVO {

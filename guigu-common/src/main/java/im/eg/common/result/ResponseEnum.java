@@ -40,6 +40,7 @@ public enum ResponseEnum {
     LEND_FULL_SCALE_ERROR(306, "已满标，无法投标"),
     NOT_SUFFICIENT_FUNDS_ERROR(307, "余额不足，请充值"),
     BORROWER_NOT_EXIST(308, "借款人不存在"),
+    LEND_NOT_EXIST(309, "标的不存在"),
 
     PAY_UNIFIED_ORDER_ERROR(401, "统一下单错误"),
 
