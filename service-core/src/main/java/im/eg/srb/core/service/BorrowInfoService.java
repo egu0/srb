@@ -1,7 +1,10 @@
 package im.eg.srb.core.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
+import im.eg.srb.core.pojo.vo.BorrowInfoDetailVO;
 
 import java.math.BigDecimal;
 
@@ -29,4 +32,9 @@ public interface BorrowInfoService extends IService<BorrowInfo> {
      * 获取用户的借款状态
      */
     Integer getStatusByUserId(Long userId);
+
+    /**
+     * 借款信息分页列表
+     */
+    IPage<BorrowInfoDetailVO> listPage(Page<BorrowInfo> pageParam);
 }

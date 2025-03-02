@@ -1,6 +1,8 @@
 package im.eg.srb.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
 import im.eg.common.result.ResponseEnum;
@@ -13,7 +15,9 @@ import im.eg.srb.core.mapper.UserInfoMapper;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
 import im.eg.srb.core.pojo.entity.IntegralGrade;
 import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.vo.BorrowInfoDetailVO;
 import im.eg.srb.core.service.BorrowInfoService;
+import im.eg.srb.core.service.DictService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,6 +41,9 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
 
     @Resource
     private IntegralGradeMapper integralGradeMapper;
+
+    @Resource
+    private DictService dictService;
 
     @Override
     public BigDecimal getBorrowAmount(Long userId) {
@@ -72,7 +79,7 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
 
         // 借款申请
         borrowInfo.setUserId(userId);
-        BigDecimal yearRate = borrowInfo.getBorrowYearRate().divide(new BigDecimal("100"), RoundingMode.HALF_UP);
+        BigDecimal yearRate = borrowInfo.getBorrowYearRate().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         borrowInfo.setBorrowYearRate(yearRate);
         borrowInfo.setStatus(BorrowInfoStatusEnum.CHECK_RUN.getStatus()); // 状态：审核中
         baseMapper.insert(borrowInfo);
@@ -88,5 +95,18 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
         } else {
             return BorrowInfoStatusEnum.NO_AUTH.getStatus(); // 未认证（未申请）
         }
+    }
+
+    @Override
+    public IPage<BorrowInfoDetailVO> listPage(Page<BorrowInfo> pageParam) {
+        IPage<BorrowInfoDetailVO> page = baseMapper.selectBorrowInfoPageList(pageParam);
+        page.getRecords().forEach(vo -> {
+            vo.getParam().put("status", BorrowInfoStatusEnum.getMsgByStatus(vo.getStatus()));
+            vo.getParam().put("returnMethod",
+                    dictService.getDictName("returnMethod", vo.getReturnMethod()));
+            vo.getParam().put("moneyUse",
+                    dictService.getDictName("moneyUse", vo.getMoneyUse()));
+        });
+        return page;
     }
 }
