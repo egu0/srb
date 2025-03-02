@@ -23,6 +23,7 @@ import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.service.BorrowInfoService;
 import im.eg.srb.core.service.BorrowerService;
 import im.eg.srb.core.service.DictService;
+import im.eg.srb.core.service.LendService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,9 @@ import java.util.Map;
  */
 @Service
 public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowInfo> implements BorrowInfoService {
+
+    @Resource
+    private LendService lendService;
 
     @Resource
     private UserInfoMapper userInfoMapper;
@@ -164,7 +168,8 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
 
         // 创建标的
         if (BorrowInfoStatusEnum.CHECK_OK.getStatus().equals(borrowInfoApprovalVO.getStatus())) {
-            // TODO
+            BorrowInfo borrowInfo = baseMapper.selectById(borrowInfoId);
+            lendService.createLend(borrowInfoApprovalVO, borrowInfo);
         }
     }
 }
