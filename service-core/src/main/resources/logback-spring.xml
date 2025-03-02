@@ -79,7 +79,8 @@
     <!--开发环境和测试环境-->
     <!-- 如果当前环境(spring.profiles.active)为 dev 或 test 那么此项生效 -->
     <springProfile name="dev,test">
-        <logger name="im.eg" level="INFO">
+        <!--        <logger name="im.eg" level="INFO">-->
+        <logger name="ROOT" level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ROLLING_FILE"/>
         </logger>

@@ -7,6 +7,7 @@ import im.eg.srb.core.pojo.entity.BorrowInfo;
 import im.eg.srb.core.pojo.vo.BorrowInfoDetailVO;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * <p>
@@ -37,4 +38,9 @@ public interface BorrowInfoService extends IService<BorrowInfo> {
      * 借款信息分页列表
      */
     IPage<BorrowInfoDetailVO> listPage(Page<BorrowInfo> pageParam);
+
+    /**
+     * 获取借款信息详情
+     */
+    Map<String, Object> getBorrowInfoDetailById(Long borrowInfoId);
 }

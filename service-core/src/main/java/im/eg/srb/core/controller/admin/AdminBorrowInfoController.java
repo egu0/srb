@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * <p>
@@ -46,5 +47,11 @@ public class AdminBorrowInfoController {
         return R.ok().data("list", listModel);
     }
 
-}
+    @ApiOperation("借款信息详情")
+    @GetMapping("/detail/{id}")
+    public R detail(@ApiParam(value = "借款信息 id", required = true) @PathVariable Long id) {
+        Map<String, Object> detail = borrowInfoService.getBorrowInfoDetailById(id);
+        return R.ok().data("detail", detail);
+    }
 
+}
