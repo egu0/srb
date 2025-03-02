@@ -5,16 +5,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import im.eg.common.result.R;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
+import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowInfoDetailVO;
 import im.eg.srb.core.service.BorrowInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -52,6 +50,13 @@ public class AdminBorrowInfoController {
     public R detail(@ApiParam(value = "借款信息 id", required = true) @PathVariable Long id) {
         Map<String, Object> detail = borrowInfoService.getBorrowInfoDetailById(id);
         return R.ok().data("detail", detail);
+    }
+
+    @ApiOperation("审批借款信息")
+    @PostMapping("/approval")
+    public R approval(@RequestBody BorrowInfoApprovalVO borrowInfoApprovalVO) {
+        borrowInfoService.approval(borrowInfoApprovalVO);
+        return R.ok().message("审批完成");
     }
 
 }

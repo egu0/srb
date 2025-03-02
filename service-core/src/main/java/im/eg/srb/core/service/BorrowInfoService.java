@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
+import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowInfoDetailVO;
 
 import java.math.BigDecimal;
@@ -43,4 +44,9 @@ public interface BorrowInfoService extends IService<BorrowInfo> {
      * 获取借款信息详情
      */
     Map<String, Object> getBorrowInfoDetailById(Long borrowInfoId);
+
+    /**
+     * 审批借款信息
+     */
+    void approval(BorrowInfoApprovalVO borrowInfoApprovalVO);
 }

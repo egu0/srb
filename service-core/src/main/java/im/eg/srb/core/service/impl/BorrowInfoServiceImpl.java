@@ -17,6 +17,7 @@ import im.eg.srb.core.pojo.entity.BorrowInfo;
 import im.eg.srb.core.pojo.entity.Borrower;
 import im.eg.srb.core.pojo.entity.IntegralGrade;
 import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowInfoDetailVO;
 import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.service.BorrowInfoService;
@@ -24,6 +25,7 @@ import im.eg.srb.core.service.BorrowerService;
 import im.eg.srb.core.service.DictService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -148,5 +150,21 @@ public class BorrowInfoServiceImpl extends ServiceImpl<BorrowInfoMapper, BorrowI
         data.put("borrowInfoDetail", borrowInfoDetailVO); // 借款申请信息
         data.put("borrowerDetail", borrowerDetailVO); // 借款人信息
         return data;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void approval(BorrowInfoApprovalVO borrowInfoApprovalVO) {
+        // 修改「borrow_info」表对应记录的状态
+        Long borrowInfoId = borrowInfoApprovalVO.getId();
+        BorrowInfo updateBorrowInfo = new BorrowInfo();
+        updateBorrowInfo.setId(borrowInfoId);
+        updateBorrowInfo.setStatus(borrowInfoApprovalVO.getStatus());
+        baseMapper.updateById(updateBorrowInfo);
+
+        // 创建标的
+        if (BorrowInfoStatusEnum.CHECK_OK.getStatus().equals(borrowInfoApprovalVO.getStatus())) {
+            // TODO
+        }
     }
 }
