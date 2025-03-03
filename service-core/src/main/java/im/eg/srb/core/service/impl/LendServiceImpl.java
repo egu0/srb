@@ -18,7 +18,7 @@ import im.eg.srb.core.pojo.vo.LendVO;
 import im.eg.srb.core.service.BorrowerService;
 import im.eg.srb.core.service.DictService;
 import im.eg.srb.core.service.LendService;
-import im.eg.srb.core.util.LendNoUtils;
+import im.eg.srb.core.util.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -135,6 +135,31 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
         data.put("lend", lendVO);
         data.put("borrower", borrowerDetailVO);
         return data;
+    }
+
+    @Override
+    public BigDecimal calculateInvestmentInterest(BigDecimal invest, BigDecimal yearRate, Integer totalMonth, Integer returnMethod) {
+        BigDecimal interest = new BigDecimal("0");
+        if (returnMethod == null || yearRate == null || invest == null || totalMonth == null) {
+            return interest;
+        }
+        switch (returnMethod) {
+            case 1: // ReturnMethodEnum.ONE.getMethod() == 1
+                interest = Amount1Helper.getInterestCount(invest, yearRate, totalMonth);
+                break;
+            case 2:
+                interest = Amount2Helper.getInterestCount(invest, yearRate, totalMonth);
+                break;
+            case 3:
+                interest = Amount3Helper.getInterestCount(invest, yearRate, totalMonth);
+                break;
+            case 4:
+                interest = Amount4Helper.getInterestCount(invest, yearRate, totalMonth);
+                break;
+            default:
+                break;
+        }
+        return interest;
     }
 
     private BigDecimal divide100(BigDecimal o) {

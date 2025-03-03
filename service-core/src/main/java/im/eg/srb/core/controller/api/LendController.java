@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -52,5 +53,19 @@ public class LendController {
     public R detail(@ApiParam(value = "标的 id", required = true) @PathVariable Long lendId) {
         Map<String, Object> detail = lendService.getLendDetail(lendId);
         return R.ok().data("detail", detail);
+    }
+
+    @ApiOperation("计算投资收益")
+    @GetMapping("/getInterestCount/{invest}/{yearRate}/{totalMonth}/{returnMethod}")
+    public R calculateInvestmentInterest(@ApiParam(value = "投资金额", required = true)
+                                         @PathVariable BigDecimal invest,
+                                         @ApiParam(value = "年化收益", required = true)
+                                         @PathVariable BigDecimal yearRate,
+                                         @ApiParam(value = "期数", required = true)
+                                         @PathVariable Integer totalMonth,
+                                         @ApiParam(value = "还款方式", required = true)
+                                         @PathVariable Integer returnMethod) {
+        BigDecimal totalInterest = lendService.calculateInvestmentInterest(invest, yearRate, totalMonth, returnMethod);
+        return R.ok().data("interest", totalInterest);
     }
 }

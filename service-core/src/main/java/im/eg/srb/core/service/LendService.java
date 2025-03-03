@@ -8,6 +8,7 @@ import im.eg.srb.core.pojo.entity.Lend;
 import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.LendVO;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -34,4 +35,9 @@ public interface LendService extends IService<Lend> {
      * 获取标的详细信息
      */
     Map<String, Object> getLendDetail(Long lendId);
+
+    /**
+     * 计算利息
+     */
+    BigDecimal calculateInvestmentInterest(BigDecimal invest, BigDecimal yearRate, Integer totalMonth, Integer returnMethod);
 }

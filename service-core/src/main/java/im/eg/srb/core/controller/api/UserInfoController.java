@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author EGU0
  * @since 2024-11-23
  */
-@Api
+@Api(tags = "用户管理")
 @Slf4j
 @RestController
 @RequestMapping("/api/core/userInfo")
