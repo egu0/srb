@@ -22,4 +22,9 @@ public interface UserAccountService extends IService<UserAccount> {
      * 用户支付回调
      */
     String notify(Map<String, Object> params);
+
+    /**
+     * 获取账户余额
+     */
+    BigDecimal getAccAmt(Long userId);
 }

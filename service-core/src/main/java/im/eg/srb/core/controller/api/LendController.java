@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * <p>
@@ -44,5 +45,12 @@ public class LendController {
         Page<Lend> pageParam = new Page<>(page, limit);
         IPage<LendVO> listModel = lendService.listPage(pageParam);
         return R.ok().data("list", listModel);
+    }
+
+    @ApiOperation("获取标的详细信息")
+    @GetMapping("/detail/{lendId}")
+    public R detail(@ApiParam(value = "标的 id", required = true) @PathVariable Long lendId) {
+        Map<String, Object> detail = lendService.getLendDetail(lendId);
+        return R.ok().data("detail", detail);
     }
 }

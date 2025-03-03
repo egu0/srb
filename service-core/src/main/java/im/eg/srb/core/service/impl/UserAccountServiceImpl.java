@@ -1,5 +1,6 @@
 package im.eg.srb.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.srb.core.enums.TransTypeEnum;
 import im.eg.srb.core.hfb.FormHelper;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,7 +80,19 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
                 new BigDecimal(chargeAmount), TransTypeEnum.RECHARGE, "充值");
         transFlowService.saveTransFlow(transFlowBO);
 
+//        return "此行用来测试幂等性问题";
         return "success";
+    }
+
+    @Override
+    public BigDecimal getAccAmt(Long userId) {
+        QueryWrapper<UserAccount> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("amount").eq("user_id", userId);
+        List<Object> values = baseMapper.selectObjs(queryWrapper);
+        if (!values.isEmpty()) {
+            return (BigDecimal) values.get(0);
+        }
+        return new BigDecimal("0");
     }
 
 }
