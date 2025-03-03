@@ -42,6 +42,6 @@ public class UserAccountController {
         Long userId = JwtUtils.getUserId(token);
         // 组装表单字符串，用于往汇付宝系统提交数据
         String formStr = userAccountService.commitCharge(chargeAmount, userId);
-        return R.ok();
+        return R.ok().data("formStr", formStr);
     }
 }
