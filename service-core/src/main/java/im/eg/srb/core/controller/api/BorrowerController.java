@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @Api(tags = "借款人")
 @RequestMapping("/api/core/borrower")
-public class UserBorrowerController {
+public class BorrowerController {
 
     @Resource
     private BorrowerService borrowerService;

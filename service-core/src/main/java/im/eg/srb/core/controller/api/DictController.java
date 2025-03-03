@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @Api(tags = "数据字典")
 @RequestMapping("/api/core/dict")
-public class UserDictController {
+public class DictController {
 
     @Resource
     private DictService dictService;

@@ -30,7 +30,7 @@ import javax.annotation.Resource;
 @RestController
 @Api(tags = "标的")
 @RequestMapping("/api/core/lend")
-public class UserLendController {
+public class LendController {
 
     @Resource
     private LendService lendService;

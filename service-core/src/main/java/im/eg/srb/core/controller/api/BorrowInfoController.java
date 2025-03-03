@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 @RestController
 @Api(tags = "借款信息")
 @RequestMapping("/api/core/borrowInfo")
-public class UserBorrowInfoController {
+public class BorrowInfoController {
 
     @Resource
     private BorrowInfoService borrowInfoService;
