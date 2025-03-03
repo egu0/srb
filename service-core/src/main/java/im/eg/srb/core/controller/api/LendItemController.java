@@ -1,8 +1,10 @@
 package im.eg.srb.core.controller.api;
 
 
+import com.alibaba.fastjson.JSON;
 import im.eg.common.result.R;
 import im.eg.srb.base.util.JwtUtils;
+import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.pojo.vo.InvestVO;
 import im.eg.srb.core.service.LendItemService;
 import io.swagger.annotations.Api;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * <p>
@@ -46,4 +49,27 @@ public class LendItemController {
         String formStr = lendItemService.commitInvest(investVO);
         return R.ok().data("formStr", formStr);
     }
+
+    @ApiOperation(value = "投标异步回调")
+    @PostMapping("/notify")
+    public String notify(HttpServletRequest request) {
+        Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
+        log.info("投标异步回调接口接受的参数：{}", JSON.toJSONString(params));
+
+        // 验证签名
+        if (!RequestHelper.isSignEquals(params)) {
+            log.error("投标异步回调接口 - 簽名校驗失敗：{}", JSON.toJSONString(params));
+            return "fail";
+        }
+
+        String resultCode = (String) params.get("resultCode");
+        if ("0001".equals(resultCode)) {
+            return lendItemService.notify(params);
+        } else {
+            log.error("投标异步回调接口 - 投标失败：{}", JSON.toJSONString(params));
+        }
+
+        return "success";
+    }
+
 }

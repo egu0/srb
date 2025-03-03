@@ -1,21 +1,22 @@
 package im.eg.srb.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
 import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.enums.LendStatusEnum;
+import im.eg.srb.core.enums.TransTypeEnum;
 import im.eg.srb.core.hfb.FormHelper;
 import im.eg.srb.core.hfb.HfbConst;
 import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.mapper.LendItemMapper;
 import im.eg.srb.core.mapper.LendMapper;
+import im.eg.srb.core.mapper.UserAccountMapper;
+import im.eg.srb.core.pojo.bo.TransFlowBO;
 import im.eg.srb.core.pojo.entity.Lend;
 import im.eg.srb.core.pojo.entity.LendItem;
 import im.eg.srb.core.pojo.vo.InvestVO;
-import im.eg.srb.core.service.LendItemService;
-import im.eg.srb.core.service.LendService;
-import im.eg.srb.core.service.UserAccountService;
-import im.eg.srb.core.service.UserBindService;
+import im.eg.srb.core.service.*;
 import im.eg.srb.core.util.LendNoUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,10 +45,16 @@ public class LendItemServiceImpl extends ServiceImpl<LendItemMapper, LendItem> i
     private UserAccountService userAccountService;
 
     @Resource
+    private UserAccountMapper userAccountMapper;
+
+    @Resource
     private UserBindService userBindService;
 
     @Resource
     private LendService lendService;
+
+    @Resource
+    private TransFlowService transFlowService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -117,5 +124,53 @@ public class LendItemServiceImpl extends ServiceImpl<LendItemMapper, LendItem> i
         params.put("sign", sign);
 
         return FormHelper.buildForm(HfbConst.INVEST_URL, params);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String notify(Map<String, Object> params) {
+        // 幂等性判断。查询流水表「trans_flow」判断是否已经处理
+        String agentBillNo = (String) params.get("agentBillNo");
+        Integer count = transFlowService.countByTransNo(agentBillNo);
+        if (count == 1) {
+            return "success";
+        }
+
+        // 修改账户金额
+        String voteBindCode = (String) params.get("voteBindCode"); // 投资人绑定协议号
+        String voteAmt = (String) params.get("voteAmt"); // 投资人绑定协议号
+        userAccountMapper.updateAccount(voteBindCode,
+                new BigDecimal("-" + voteAmt), new BigDecimal(voteAmt));
+
+        // 修改投资记录状态
+        LendItem lendItem = this.getByLendItemNo(agentBillNo);
+        LendItem updateLendItem = new LendItem();
+        updateLendItem.setId(lendItem.getId());
+        updateLendItem.setStatus(1);
+        baseMapper.updateById(updateLendItem);
+
+        // 修改标的记录：投资人数、已投金额
+        Long lendId = lendItem.getLendId();
+        Lend lend = lendMapper.selectById(lendId);
+        Lend updateLend = new Lend();
+        updateLend.setId(lendId);
+        updateLend.setInvestNum(lend.getInvestNum() + 1);
+        updateLend.setInvestAmount(lend.getInvestAmount().add(lendItem.getInvestAmount()));
+        lendMapper.updateById(updateLend);
+
+        // 增加交易流水记录
+        TransFlowBO transFlowBO = new TransFlowBO(agentBillNo, voteBindCode,
+                new BigDecimal(voteAmt), TransTypeEnum.INVEST_LOCK,
+                String.format("标的编号：%s，标的名称：%s", lend.getLendNo(), lend.getTitle()));
+        transFlowService.saveTransFlow(transFlowBO);
+
+        return "success";
+    }
+
+    @Override
+    public LendItem getByLendItemNo(String lendItemNo) {
+        QueryWrapper<LendItem> qw = new QueryWrapper<>();
+        qw.eq("lend_item_no", lendItemNo);
+        return baseMapper.selectOne(qw);
     }
 }
