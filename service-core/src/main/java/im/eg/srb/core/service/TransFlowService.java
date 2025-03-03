@@ -1,5 +1,6 @@
 package im.eg.srb.core.service;
 
+import im.eg.srb.core.pojo.bo.TransFlowBO;
 import im.eg.srb.core.pojo.entity.TransFlow;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface TransFlowService extends IService<TransFlow> {
 
+    void saveTransFlow(TransFlowBO transFlowBO);
+
+    /**
+     * 统计流水号（trans_flow.trans_no）是否存在
+     */
+    Integer countByTransNo(String transNo);
 }

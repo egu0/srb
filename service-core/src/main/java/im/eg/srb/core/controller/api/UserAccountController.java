@@ -1,8 +1,10 @@
 package im.eg.srb.core.controller.api;
 
 
+import com.alibaba.fastjson.JSON;
 import im.eg.common.result.R;
 import im.eg.srb.base.util.JwtUtils;
+import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.service.UserAccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * <p>
@@ -44,4 +47,28 @@ public class UserAccountController {
         String formStr = userAccountService.commitCharge(chargeAmount, userId);
         return R.ok().data("formStr", formStr);
     }
+
+    @ApiOperation(value = "用户充值异步回调")
+    @PostMapping("/notify")
+    public String notify(HttpServletRequest request) {
+        Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
+        log.info("用户充值异步回调接口接受的参数：{}", JSON.toJSONString(params));
+
+        // 验证签名
+        if (!RequestHelper.isSignEquals(params)) {
+            log.error("用户充值异步回调接口 - 簽名校驗失敗：{}", JSON.toJSONString(params));
+            return "fail";
+        }
+
+        String resultCode = (String) params.get("resultCode");
+        if ("0001".equals(resultCode)) {
+            return userAccountService.notify(params);
+        } else {
+            log.error("用户充值异步回调接口 - 充值失败：{}", JSON.toJSONString(params));
+        }
+
+//        return "此行用来测试幂等性问题";
+        return "success";
+    }
+
 }

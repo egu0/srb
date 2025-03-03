@@ -1,16 +1,20 @@
 package im.eg.srb.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.srb.core.enums.TransTypeEnum;
 import im.eg.srb.core.hfb.FormHelper;
 import im.eg.srb.core.hfb.HfbConst;
 import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.mapper.UserAccountMapper;
 import im.eg.srb.core.mapper.UserInfoMapper;
+import im.eg.srb.core.pojo.bo.TransFlowBO;
 import im.eg.srb.core.pojo.entity.UserAccount;
 import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.service.TransFlowService;
 import im.eg.srb.core.service.UserAccountService;
 import im.eg.srb.core.util.LendNoUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -31,6 +35,9 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     @Resource
     private UserInfoMapper userInfoMapper;
 
+    @Resource
+    private TransFlowService transFlowService;
+
     @Override
     public String commitCharge(BigDecimal chargeAmount, Long userId) {
         UserInfo userInfo = userInfoMapper.selectById(userId);
@@ -50,4 +57,28 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         // 组装表单
         return FormHelper.buildForm(HfbConst.RECHARGE_URL, params);
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String notify(Map<String, Object> params) {
+        // 幂等性判断。查询流水表「trans_flow」判断是否已经处理
+        String agentBillNo = (String) params.get("agentBillNo");
+        Integer count = transFlowService.countByTransNo(agentBillNo);
+        if (count == 1) {
+            return "success";
+        }
+
+        // 账户处理。更新 user_account 表中的金额字段
+        String bindCode = (String) params.get("bindCode");
+        String chargeAmount = (String) params.get("chargeAmt");
+        baseMapper.updateAccount(bindCode, new BigDecimal(chargeAmount), new BigDecimal("0"));
+
+        // 新增账户流水
+        TransFlowBO transFlowBO = new TransFlowBO(agentBillNo, bindCode,
+                new BigDecimal(chargeAmount), TransTypeEnum.RECHARGE, "充值");
+        transFlowService.saveTransFlow(transFlowBO);
+
+        return "success";
+    }
+
 }
