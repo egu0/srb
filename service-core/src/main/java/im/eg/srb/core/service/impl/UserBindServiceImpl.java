@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -102,5 +103,16 @@ public class UserBindServiceImpl extends ServiceImpl<UserBindMapper, UserBind> i
         userInfo.setIdCard(userBind.getIdCard());
         userInfo.setBindStatus(UserBindEnum.BIND_OK.getStatus());
         userInfoMapper.updateById(userInfo);
+    }
+
+    @Override
+    public String getBindCodeByUserId(Long userId) {
+        QueryWrapper<UserBind> qw = new QueryWrapper<>();
+        qw.select("bind_code").eq("user_id", userId);
+        List<Object> result = baseMapper.selectObjs(qw);
+        if (!result.isEmpty()) {
+            return (String) result.get(0);
+        }
+        return "";
     }
 }

@@ -25,4 +25,9 @@ public interface UserBindService extends IService<UserBind> {
      * 帳戶綁定異步回調處理
      */
     void notify(Map<String, Object> params);
+
+    /**
+     * 根据 userId 获取用户的第三方资金托管平台绑定号
+     */
+    String getBindCodeByUserId(Long userId);
 }

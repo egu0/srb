@@ -1,7 +1,8 @@
 package im.eg.srb.core.service;
 
-import im.eg.srb.core.pojo.entity.LendItem;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.entity.LendItem;
+import im.eg.srb.core.pojo.vo.InvestVO;
 
 /**
  * <p>
@@ -13,4 +14,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface LendItemService extends IService<LendItem> {
 
+    /**
+     * 构建用于投资人投标的自动表单提交页（自动发送到汇付宝平台）
+     */
+    String commitInvest(InvestVO investVO);
 }
