@@ -17,17 +17,11 @@ import im.eg.srb.core.mapper.LendMapper;
 import im.eg.srb.core.mapper.UserAccountMapper;
 import im.eg.srb.core.mapper.UserInfoMapper;
 import im.eg.srb.core.pojo.bo.TransFlowBO;
-import im.eg.srb.core.pojo.entity.BorrowInfo;
-import im.eg.srb.core.pojo.entity.Borrower;
-import im.eg.srb.core.pojo.entity.Lend;
-import im.eg.srb.core.pojo.entity.UserInfo;
+import im.eg.srb.core.pojo.entity.*;
 import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.pojo.vo.LendVO;
-import im.eg.srb.core.service.BorrowerService;
-import im.eg.srb.core.service.DictService;
-import im.eg.srb.core.service.LendService;
-import im.eg.srb.core.service.TransFlowService;
+import im.eg.srb.core.service.*;
 import im.eg.srb.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -74,6 +68,9 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
 
     @Resource
     private TransFlowService transFlowService;
+
+    @Resource
+    private LendItemService lendItemService;
 
     @Override
     public void createLend(BorrowInfoApprovalVO borrowInfoApprovalVO, BorrowInfo borrowInfo) {
@@ -233,8 +230,27 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
         );
         transFlowService.saveTransFlow(transFlowBO);
 
-//        d. 解冻并扣除投资人资金
+        List<LendItem> lendItemList = lendItemService.lendItemsOfLend(String.valueOf(lendId), 1);
+        lendItemList.forEach(lendItem -> {
+            Long investUserId = lendItem.getInvestUserId();
+            UserInfo userInfo1 = userInfoMapper.selectById(investUserId);
+            String bindCode1 = userInfo1.getBindCode();
+//        d. 扣除投资人解冻资金
+            userAccountMapper.updateAccount(bindCode1, new BigDecimal("0"),
+                    lendItem.getInvestAmount().negate() // 取负数
+            );
+
 //        e. 增加投资人交易流水
+            TransFlowBO transFlowBO1 = new TransFlowBO(
+                    LendNoUtils.getTransNo(), //
+                    bindCode1, // 借款人绑定编号
+                    lendItem.getInvestAmount(), // 解冻金额
+                    TransTypeEnum.INVEST_UNLOCK,
+                    String.format("冻结资金转出，标的编号 %s，标的标题 %s", lend.getLendNo(), lend.getTitle())
+            );
+            transFlowService.saveTransFlow(transFlowBO1);
+        });
+
 //        f. 生成借款人还款计划和出借人回款计划
     }
 

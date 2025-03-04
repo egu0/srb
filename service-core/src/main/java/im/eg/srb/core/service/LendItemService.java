@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import im.eg.srb.core.pojo.entity.LendItem;
 import im.eg.srb.core.pojo.vo.InvestVO;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,4 +28,9 @@ public interface LendItemService extends IService<LendItem> {
     String notify(Map<String, Object> params);
 
     LendItem getByLendItemNo(String lendItemNo);
+
+    /**
+     * 获取标的的投资信息
+     */
+    List<LendItem> lendItemsOfLend(String lendId, Integer status);
 }

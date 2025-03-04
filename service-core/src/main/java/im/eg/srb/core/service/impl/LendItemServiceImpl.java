@@ -25,6 +25,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -172,5 +173,12 @@ public class LendItemServiceImpl extends ServiceImpl<LendItemMapper, LendItem> i
         QueryWrapper<LendItem> qw = new QueryWrapper<>();
         qw.eq("lend_item_no", lendItemNo);
         return baseMapper.selectOne(qw);
+    }
+
+    @Override
+    public List<LendItem> lendItemsOfLend(String lendId, Integer status) {
+        QueryWrapper<LendItem> q = new QueryWrapper<>();
+        q.eq("status", status).eq("lend_id", lendId);
+        return baseMapper.selectList(q);
     }
 }
