@@ -9,23 +9,30 @@ import im.eg.common.exception.Assert;
 import im.eg.common.exception.BusinessException;
 import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.enums.LendStatusEnum;
+import im.eg.srb.core.enums.TransTypeEnum;
 import im.eg.srb.core.hfb.HfbConst;
 import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.mapper.BorrowerMapper;
 import im.eg.srb.core.mapper.LendMapper;
+import im.eg.srb.core.mapper.UserAccountMapper;
+import im.eg.srb.core.mapper.UserInfoMapper;
+import im.eg.srb.core.pojo.bo.TransFlowBO;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
 import im.eg.srb.core.pojo.entity.Borrower;
 import im.eg.srb.core.pojo.entity.Lend;
+import im.eg.srb.core.pojo.entity.UserInfo;
 import im.eg.srb.core.pojo.vo.BorrowInfoApprovalVO;
 import im.eg.srb.core.pojo.vo.BorrowerDetailVO;
 import im.eg.srb.core.pojo.vo.LendVO;
 import im.eg.srb.core.service.BorrowerService;
 import im.eg.srb.core.service.DictService;
 import im.eg.srb.core.service.LendService;
+import im.eg.srb.core.service.TransFlowService;
 import im.eg.srb.core.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -58,6 +65,15 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
 
     @Resource
     private BorrowerService borrowerService;
+
+    @Resource
+    private UserInfoMapper userInfoMapper;
+
+    @Resource
+    private UserAccountMapper userAccountMapper;
+
+    @Resource
+    private TransFlowService transFlowService;
 
     @Override
     public void createLend(BorrowInfoApprovalVO borrowInfoApprovalVO, BorrowInfo borrowInfo) {
@@ -168,6 +184,7 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
         return interest;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void makeLoan(Long lendId) {
         Lend lend = baseMapper.selectById(lendId);
@@ -192,10 +209,30 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
             throw new BusinessException(response.getString("resultMsg"));
         }
 
-//         todo
 //        a. 标的状态和标的平台收益
+        lend.setRealAmount(mchFee); // 平台实际收益
+        lend.setStatus(LendStatusEnum.PAY_RUN.getStatus());
+        lend.setPaymentTime(LocalDateTime.now());
+        baseMapper.updateById(lend);
+
 //        b. 给借款账号转入金额
+        Long userId = lend.getUserId();
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+        String bindCode = userInfo.getBindCode();
+        BigDecimal voteAmt = new BigDecimal(response.getString("voteAmt"));
+        userAccountMapper.updateAccount(bindCode, voteAmt,
+                new BigDecimal("0"));
+
 //        c. 增加借款交易流水
+        TransFlowBO transFlowBO = new TransFlowBO(
+                response.getString("agentBillNo"), // 放款编号
+                bindCode, // 借款人绑定编号
+                voteAmt, // 到账金额
+                TransTypeEnum.BORROW_BACK,
+                String.format("标的放款，标的编号 %s，标的标题 %s", lend.getLendNo(), lend.getTitle())
+        );
+        transFlowService.saveTransFlow(transFlowBO);
+
 //        d. 解冻并扣除投资人资金
 //        e. 增加投资人交易流水
 //        f. 生成借款人还款计划和出借人回款计划
