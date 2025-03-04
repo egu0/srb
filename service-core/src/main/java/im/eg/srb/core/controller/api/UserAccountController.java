@@ -6,7 +6,6 @@ import im.eg.common.result.R;
 import im.eg.srb.base.util.JwtUtils;
 import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.service.UserAccountService;
-import io.jsonwebtoken.Jwt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -84,6 +83,28 @@ public class UserAccountController {
         String token = request.getHeader("token");
         Long userId = JwtUtils.getUserId(token);
         return R.ok().data("formStr", userAccountService.commitWithdraw(fetchAmt, userId));
+    }
+
+    @ApiOperation(value = "用户提现异步回调")
+    @PostMapping("/notifyWithdraw")
+    public String notifyOfWithdraw(HttpServletRequest request) {
+        Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
+        log.info("用户提现异步回调接口 - 接受的参数：{}", JSON.toJSONString(params));
+
+        // 验证签名
+        if (!RequestHelper.isSignEquals(params)) {
+            log.error("用户提现异步回调接口 - 簽名校驗失敗：{}", JSON.toJSONString(params));
+            return "fail";
+        }
+
+        String resultCode = (String) params.get("resultCode");
+        if ("0001".equals(resultCode)) {
+            return userAccountService.notifyWithdraw(params);
+        } else {
+            log.error("用户提现异步回调接口 - 充值失败：{}", JSON.toJSONString(params));
+        }
+
+        return "success";
     }
 
 }

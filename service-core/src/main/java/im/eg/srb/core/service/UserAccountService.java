@@ -32,4 +32,9 @@ public interface UserAccountService extends IService<UserAccount> {
      * 构造自动提交表单，用于向汇付宝系统发送提现请求
      */
     String commitWithdraw(BigDecimal fetchAmt, Long userId);
+
+    /**
+     * 用户提现异步回调
+     */
+    String notifyWithdraw(Map<String, Object> params);
 }

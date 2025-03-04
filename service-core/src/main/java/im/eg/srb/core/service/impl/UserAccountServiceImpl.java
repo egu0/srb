@@ -49,6 +49,9 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     @Resource
     private UserAccountService userAccountService;
 
+    @Resource
+    private UserAccountMapper userAccountMapper;
+
     @Override
     public String commitCharge(BigDecimal chargeAmount, Long userId) {
         UserInfo userInfo = userInfoMapper.selectById(userId);
@@ -124,6 +127,27 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         params.put("timestamp", RequestHelper.getTimestamp());
         params.put("sign", RequestHelper.getSign(params));
         return FormHelper.buildForm(HfbConst.WITHDRAW_URL, params);
+    }
+
+    @Override
+    public String notifyWithdraw(Map<String, Object> params) {
+        // 幂等性问题
+        String agentBillNo = (String) params.get("agentBillNo");
+        Integer count = transFlowService.countByTransNo(agentBillNo);
+        if (count == 1) {
+            return "success";
+        }
+
+        // 金额同步
+        String bindCode = (String) params.get("bindCode");
+        BigDecimal fetchAmt = new BigDecimal((String) params.get("fetchAmt"));
+        userAccountMapper.updateAccount(bindCode, fetchAmt.negate(), BigDecimal.ZERO);
+
+        // 交易流水
+        TransFlowBO transFlowBO = new TransFlowBO(agentBillNo, bindCode,
+                fetchAmt, TransTypeEnum.WITHDRAW, "提现");
+        transFlowService.saveTransFlow(transFlowBO);
+        return "success";
     }
 
 }
