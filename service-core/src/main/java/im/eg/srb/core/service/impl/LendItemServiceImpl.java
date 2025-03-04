@@ -176,7 +176,7 @@ public class LendItemServiceImpl extends ServiceImpl<LendItemMapper, LendItem> i
     }
 
     @Override
-    public List<LendItem> lendItemsOfLend(String lendId, Integer status) {
+    public List<LendItem> lendItemsOfLend(Long lendId, Integer status) {
         QueryWrapper<LendItem> q = new QueryWrapper<>();
         q.eq("status", status).eq("lend_id", lendId);
         return baseMapper.selectList(q);

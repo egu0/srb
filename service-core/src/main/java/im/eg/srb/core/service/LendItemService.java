@@ -32,5 +32,5 @@ public interface LendItemService extends IService<LendItem> {
     /**
      * 获取标的的投资信息
      */
-    List<LendItem> lendItemsOfLend(String lendId, Integer status);
+    List<LendItem> lendItemsOfLend(Long lendId, Integer status);
 }
