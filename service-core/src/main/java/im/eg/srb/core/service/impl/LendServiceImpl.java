@@ -1,12 +1,16 @@
 package im.eg.srb.core.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
+import im.eg.common.exception.BusinessException;
 import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.enums.LendStatusEnum;
+import im.eg.srb.core.hfb.HfbConst;
+import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.mapper.BorrowerMapper;
 import im.eg.srb.core.mapper.LendMapper;
 import im.eg.srb.core.pojo.entity.BorrowInfo;
@@ -19,6 +23,7 @@ import im.eg.srb.core.service.BorrowerService;
 import im.eg.srb.core.service.DictService;
 import im.eg.srb.core.service.LendService;
 import im.eg.srb.core.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +46,7 @@ import java.util.stream.Collectors;
  * @author EGU0
  * @since 2024-11-23
  */
+@Slf4j
 @Service
 public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements LendService {
 
@@ -160,6 +166,39 @@ public class LendServiceImpl extends ServiceImpl<LendMapper, Lend> implements Le
                 break;
         }
         return interest;
+    }
+
+    @Override
+    public void makeLoan(Long lendId) {
+        Lend lend = baseMapper.selectById(lendId);
+
+        // 调用汇付宝放款接口
+        Map<String, Object> params = new HashMap<>();
+        params.put("agentId", HfbConst.AGENT_ID);
+        params.put("agentProjectCode", lend.getLendNo()); // 标的编号
+        params.put("agentBillNo", LendNoUtils.getLoanNo()); // 放款编号
+        // 平台服务费 = 已投金额 x 月年化 x 投资时长
+        BigDecimal monthRate = lend.getServiceRate().divide(new BigDecimal("12"), 8, RoundingMode.HALF_DOWN);
+        BigDecimal mchFee = lend.getInvestAmount().multiply(monthRate).multiply(new BigDecimal(lend.getPeriod()));
+        params.put("mchFee", mchFee);
+        params.put("timestamp", RequestHelper.getTimestamp());
+        params.put("sign", RequestHelper.getSign(params));
+        // 提交远程请求
+        JSONObject response = RequestHelper.sendRequest(params, HfbConst.MAKE_LOAD_URL);
+
+        // 无需校验签名，因为是同步请求
+        // 放款失败
+        if (!"0000".equals(response.getString("resultCode"))) {
+            throw new BusinessException(response.getString("resultMsg"));
+        }
+
+//         todo
+//        a. 标的状态和标的平台收益
+//        b. 给借款账号转入金额
+//        c. 增加借款交易流水
+//        d. 解冻并扣除投资人资金
+//        e. 增加投资人交易流水
+//        f. 生成借款人还款计划和出借人回款计划
     }
 
     private BigDecimal divide100(BigDecimal o) {

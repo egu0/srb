@@ -103,7 +103,7 @@ public class LendItemServiceImpl extends ServiceImpl<LendItemMapper, LendItem> i
 
         // 封装参数
         String voteBindCode = userBindService.getBindCodeByUserId(userId); // 投资人的绑定号
-        String benefitBindCode = userBindService.getBindCodeByUserId(userId); // 借款人的绑定号
+        String benefitBindCode = userBindService.getBindCodeByUserId(lend.getUserId()); // 借款人的绑定号
 
         Map<String, Object> params = new HashMap<>();
         params.put("agentId", HfbConst.AGENT_ID);
