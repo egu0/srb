@@ -1,10 +1,13 @@
 package im.eg.srb.core.service.impl;
 
-import im.eg.srb.core.pojo.entity.LendReturn;
-import im.eg.srb.core.mapper.LendReturnMapper;
-import im.eg.srb.core.service.LendReturnService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.srb.core.mapper.LendReturnMapper;
+import im.eg.srb.core.pojo.entity.LendReturn;
+import im.eg.srb.core.service.LendReturnService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class LendReturnServiceImpl extends ServiceImpl<LendReturnMapper, LendReturn> implements LendReturnService {
 
+    @Override
+    public List<LendReturn> listById(Long lendId) {
+        QueryWrapper<LendReturn> q = new QueryWrapper<>();
+        q.eq("lend_id", lendId);
+        return baseMapper.selectList(q);
+    }
 }

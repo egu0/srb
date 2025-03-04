@@ -1,7 +1,9 @@
 package im.eg.srb.core.service;
 
-import im.eg.srb.core.pojo.entity.LendReturn;
 import com.baomidou.mybatisplus.extension.service.IService;
+import im.eg.srb.core.pojo.entity.LendReturn;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +15,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface LendReturnService extends IService<LendReturn> {
 
+    /**
+     * 根据 lendId 查询标的的还款计划
+     */
+    List<LendReturn> listById(Long lendId);
 }
