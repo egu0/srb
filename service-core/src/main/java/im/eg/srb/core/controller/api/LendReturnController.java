@@ -1,4 +1,5 @@
-package im.eg.srb.core.controller.admin;
+package im.eg.srb.core.controller.api;
+
 
 import im.eg.common.result.R;
 import im.eg.srb.core.service.LendReturnService;
@@ -13,11 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+/**
+ * <p>
+ * 还款记录表 前端控制器
+ * </p>
+ *
+ * @author EGU0
+ * @since 2024-11-23
+ */
 @Slf4j
-@Api(tags = "还款记录")
 @RestController
-@RequestMapping("/admin/core/lendReturn")
-public class AdminLendReturnController {
+@Api(tags = "标的还款计划")
+@RequestMapping("/api/core/lendReturn")
+public class LendReturnController {
     @Resource
     private LendReturnService lendReturnService;
 
