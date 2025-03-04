@@ -6,6 +6,7 @@ import im.eg.common.result.R;
 import im.eg.srb.base.util.JwtUtils;
 import im.eg.srb.core.hfb.RequestHelper;
 import im.eg.srb.core.service.UserAccountService;
+import io.jsonwebtoken.Jwt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -74,6 +75,15 @@ public class UserAccountController {
         Long userId = JwtUtils.getUserId(token);
         BigDecimal amount = userAccountService.getAccAmt(userId);
         return R.ok().data("amount", amount);
+    }
+
+    @ApiOperation("用户提现")
+    @PostMapping("/auth/commitWithdraw/{fetchAmt}")
+    public R commitWithdraw(@ApiParam(value = "金额", required = true) @PathVariable BigDecimal fetchAmt,
+                            HttpServletRequest request) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        return R.ok().data("formStr", userAccountService.commitWithdraw(fetchAmt, userId));
     }
 
 }

@@ -42,6 +42,7 @@ public enum ResponseEnum {
     BORROWER_NOT_EXIST(308, "借款人不存在"),
     LEND_NOT_EXIST(309, "标的不存在"),
     INVEST_AMOUNT_NOT_VALID(310, "投资金额不能小于标的最低限制"),
+    INVALID_AMOUNT(311, "金额非法"),
 
     PAY_UNIFIED_ORDER_ERROR(401, "统一下单错误"),
 

@@ -2,6 +2,8 @@ package im.eg.srb.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import im.eg.common.exception.Assert;
+import im.eg.common.result.ResponseEnum;
 import im.eg.srb.core.enums.TransTypeEnum;
 import im.eg.srb.core.hfb.FormHelper;
 import im.eg.srb.core.hfb.HfbConst;
@@ -13,6 +15,7 @@ import im.eg.srb.core.pojo.entity.UserAccount;
 import im.eg.srb.core.pojo.entity.UserInfo;
 import im.eg.srb.core.service.TransFlowService;
 import im.eg.srb.core.service.UserAccountService;
+import im.eg.srb.core.service.UserBindService;
 import im.eg.srb.core.util.LendNoUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +42,12 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
 
     @Resource
     private TransFlowService transFlowService;
+
+    @Resource
+    private UserBindService userBindService;
+
+    @Resource
+    private UserAccountService userAccountService;
 
     @Override
     public String commitCharge(BigDecimal chargeAmount, Long userId) {
@@ -93,6 +102,28 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
             return (BigDecimal) values.get(0);
         }
         return new BigDecimal("0");
+    }
+
+    @Override
+    public String commitWithdraw(BigDecimal fetchAmt, Long userId) {
+
+        Assert.isTrue(fetchAmt != null && fetchAmt.compareTo(BigDecimal.ZERO) >= 0, ResponseEnum.INVALID_AMOUNT);
+
+        // 校验余额
+        BigDecimal balance = userAccountService.getAccAmt(userId);
+        Assert.isTrue(balance.compareTo(fetchAmt) >= 0, ResponseEnum.NOT_SUFFICIENT_FUNDS_ERROR);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("agentId", HfbConst.AGENT_ID);
+        params.put("agentBillNo", LendNoUtils.getWithdrawNo());
+        params.put("bindCode", userBindService.getBindCodeByUserId(userId));
+        params.put("fetchAmt", fetchAmt);
+        params.put("feeAmt", BigDecimal.ZERO);
+        params.put("notifyUrl", HfbConst.WITHDRAW_NOTIFY_URL);
+        params.put("returnUrl", HfbConst.WITHDRAW_RETURN_URL);
+        params.put("timestamp", RequestHelper.getTimestamp());
+        params.put("sign", RequestHelper.getSign(params));
+        return FormHelper.buildForm(HfbConst.WITHDRAW_URL, params);
     }
 
 }

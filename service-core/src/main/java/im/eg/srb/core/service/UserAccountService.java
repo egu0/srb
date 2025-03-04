@@ -27,4 +27,9 @@ public interface UserAccountService extends IService<UserAccount> {
      * 获取账户余额
      */
     BigDecimal getAccAmt(Long userId);
+
+    /**
+     * 构造自动提交表单，用于向汇付宝系统发送提现请求
+     */
+    String commitWithdraw(BigDecimal fetchAmt, Long userId);
 }
