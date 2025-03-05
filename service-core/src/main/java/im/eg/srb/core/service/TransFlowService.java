@@ -1,8 +1,10 @@
 package im.eg.srb.core.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import im.eg.srb.core.pojo.bo.TransFlowBO;
 import im.eg.srb.core.pojo.entity.TransFlow;
-import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -20,4 +22,9 @@ public interface TransFlowService extends IService<TransFlow> {
      * 统计流水号（trans_flow.trans_no）是否存在
      */
     Integer countByTransNo(String transNo);
+
+    /**
+     * 根据 userId 查询资金流水记录
+     */
+    List<TransFlow> listByUserId(Long userId);
 }

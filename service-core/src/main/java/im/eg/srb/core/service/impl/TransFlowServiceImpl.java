@@ -11,6 +11,7 @@ import im.eg.srb.core.service.TransFlowService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -49,5 +50,12 @@ public class TransFlowServiceImpl extends ServiceImpl<TransFlowMapper, TransFlow
         QueryWrapper<TransFlow> transFlowQueryWrapper = new QueryWrapper<>();
         transFlowQueryWrapper.eq("trans_no", transNo);
         return baseMapper.selectCount(transFlowQueryWrapper);
+    }
+
+    @Override
+    public List<TransFlow> listByUserId(Long userId) {
+        QueryWrapper<TransFlow> q = new QueryWrapper<>();
+        q.eq("user_id", userId).orderByDesc("id");
+        return baseMapper.selectList(q);
     }
 }
