@@ -12,7 +12,7 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);// 允许携带 Cookie
-        corsConfiguration.addAllowedOrigin("*");// 可接受的域
+        corsConfiguration.addAllowedOrigin("*");// 可接收的域
         corsConfiguration.addAllowedHeader("*");// 允许携带的头
         corsConfiguration.addAllowedMethod("*");// 允许访问的方式
 

@@ -52,7 +52,7 @@ public class LendItemController {
     @PostMapping("/notify")
     public String notify(HttpServletRequest request) {
         Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
-        log.info("投标异步回调接口接受的参数：{}", JSON.toJSONString(params));
+        log.info("投标异步回调接口 - 接收的参数：{}", JSON.toJSONString(params));
 
         // 验证签名
         if (!RequestHelper.isSignEquals(params)) {

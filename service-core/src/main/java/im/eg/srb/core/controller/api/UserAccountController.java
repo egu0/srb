@@ -49,7 +49,7 @@ public class UserAccountController {
     @PostMapping("/notify")
     public String notify(HttpServletRequest request) {
         Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
-        log.info("用户充值异步回调接口接受的参数：{}", JSON.toJSONString(params));
+        log.info("用户充值异步回调接口接收的参数：{}", JSON.toJSONString(params));
 
         // 验证签名
         if (!RequestHelper.isSignEquals(params)) {
@@ -89,7 +89,7 @@ public class UserAccountController {
     @PostMapping("/notifyWithdraw")
     public String notifyOfWithdraw(HttpServletRequest request) {
         Map<String, Object> params = RequestHelper.switchMap(request.getParameterMap());
-        log.info("用户提现异步回调接口 - 接受的参数：{}", JSON.toJSONString(params));
+        log.info("用户提现异步回调接口 - 接收的参数：{}", JSON.toJSONString(params));
 
         // 验证签名
         if (!RequestHelper.isSignEquals(params)) {
@@ -101,7 +101,7 @@ public class UserAccountController {
         if ("0001".equals(resultCode)) {
             return userAccountService.notifyWithdraw(params);
         } else {
-            log.error("用户提现异步回调接口 - 充值失败：{}", JSON.toJSONString(params));
+            log.error("用户提现异步回调接口 - 提现失败：{}", JSON.toJSONString(params));
         }
 
         return "success";
