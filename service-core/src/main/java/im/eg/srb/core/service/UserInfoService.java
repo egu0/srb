@@ -52,4 +52,9 @@ public interface UserInfoService extends IService<UserInfo> {
      * 获取用户空间页面所需用户信息
      */
     UserIndexVO getIndexUserVo(Long userId);
+
+    /**
+     * 根据 bindCode 获取对应用户的手机
+     */
+    String getMobileByBindCode(String bindCode);
 }

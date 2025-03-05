@@ -17,6 +17,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+        <!-- 引入 rabbitmq 模块 -->
+        <dependency>
+            <groupId>im.eg</groupId>
+            <artifactId>service-rabbitmq</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>im.eg</groupId>
             <artifactId>service-base</artifactId>

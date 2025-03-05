@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -172,5 +173,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             userIndexVO.setLastLoginTime(userLoginRecord.getCreateTime());
         }
         return userIndexVO;
+    }
+
+    @Override
+    public String getMobileByBindCode(String bindCode) {
+        QueryWrapper<UserInfo> userBindQueryWrapper = new QueryWrapper<>();
+        userBindQueryWrapper.select("mobile").eq("bind_code", bindCode);
+        List<Object> data = baseMapper.selectObjs(userBindQueryWrapper);
+        if (!data.isEmpty()) {
+            return (String) data.get(0);
+        }
+        return "";
     }
 }

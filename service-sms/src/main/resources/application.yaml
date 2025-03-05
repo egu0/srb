@@ -28,6 +28,12 @@ spring:
         max-idle: 8
         # 最小空閒連結，默認 8
         min-idle: 0
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    virtual-host: /srb
+    username: srbuser
+    password: 123456
 
 feign:
   sentinel:

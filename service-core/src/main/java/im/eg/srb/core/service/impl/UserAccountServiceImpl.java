@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import im.eg.common.exception.Assert;
 import im.eg.common.result.ResponseEnum;
+import im.eg.srb.base.dto.SmsDTO;
 import im.eg.srb.core.enums.TransTypeEnum;
 import im.eg.srb.core.hfb.FormHelper;
 import im.eg.srb.core.hfb.HfbConst;
@@ -16,7 +17,10 @@ import im.eg.srb.core.pojo.entity.UserInfo;
 import im.eg.srb.core.service.TransFlowService;
 import im.eg.srb.core.service.UserAccountService;
 import im.eg.srb.core.service.UserBindService;
+import im.eg.srb.core.service.UserInfoService;
 import im.eg.srb.core.util.LendNoUtils;
+import im.eg.srb.rabbit.constant.MQConstant;
+import im.eg.srb.rabbit.service.MQService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +54,13 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
     private UserAccountService userAccountService;
 
     @Resource
+    private UserInfoService userInfoService;
+
+    @Resource
     private UserAccountMapper userAccountMapper;
+
+    @Resource
+    private MQService mqService;
 
     @Override
     public String commitCharge(BigDecimal chargeAmount, Long userId) {
@@ -91,6 +101,12 @@ public class UserAccountServiceImpl extends ServiceImpl<UserAccountMapper, UserA
         TransFlowBO transFlowBO = new TransFlowBO(agentBillNo, bindCode,
                 new BigDecimal(chargeAmount), TransTypeEnum.RECHARGE, "充值");
         transFlowService.saveTransFlow(transFlowBO);
+
+        // 向用户发送短信，通知充值成功
+        SmsDTO smsDTO = new SmsDTO();
+        smsDTO.setMessage("充值成功");
+        smsDTO.setMobile(userInfoService.getMobileByBindCode(bindCode));
+        mqService.sendMessage(MQConstant.EXCHANGE_TOPIC_SMS, MQConstant.ROUTING_SMS_ITEM, smsDTO);
 
 //        return "此行用来测试幂等性问题";
         return "success";
