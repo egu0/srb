@@ -7,6 +7,7 @@ import im.eg.srb.core.pojo.entity.UserInfo;
 import im.eg.srb.core.pojo.query.UserInfoQuery;
 import im.eg.srb.core.pojo.vo.LoginVO;
 import im.eg.srb.core.pojo.vo.RegisterVO;
+import im.eg.srb.core.pojo.vo.UserIndexVO;
 import im.eg.srb.core.pojo.vo.UserInfoVO;
 
 /**
@@ -46,4 +47,9 @@ public interface UserInfoService extends IService<UserInfo> {
      * @return true 表示已註冊；false 表示未註冊
      */
     boolean checkMobileRegisterStatus(String mobile);
+
+    /**
+     * 获取用户空间页面所需用户信息
+     */
+    UserIndexVO getIndexUserVo(Long userId);
 }

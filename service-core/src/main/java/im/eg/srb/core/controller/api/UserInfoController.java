@@ -96,4 +96,12 @@ public class UserInfoController {
         Assert.isTrue(RegexValidateUtils.checkCellphone(mobile), ResponseEnum.MOBILE_ERROR);
         return R.ok().data("exist", userInfoService.checkMobileRegisterStatus(mobile));
     }
+
+    @ApiOperation("获取用户个人空间页面所需信息")
+    @GetMapping("/auth/getIndexUserInfo")
+    public R getIndexUserInfo(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        return R.ok().data("detail", userInfoService.getIndexUserVo(userId));
+    }
 }

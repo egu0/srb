@@ -18,6 +18,7 @@ import im.eg.srb.core.pojo.entity.UserLoginRecord;
 import im.eg.srb.core.pojo.query.UserInfoQuery;
 import im.eg.srb.core.pojo.vo.LoginVO;
 import im.eg.srb.core.pojo.vo.RegisterVO;
+import im.eg.srb.core.pojo.vo.UserIndexVO;
 import im.eg.srb.core.pojo.vo.UserInfoVO;
 import im.eg.srb.core.service.UserInfoService;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import javax.annotation.Resource;
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
     @Resource
     private UserAccountMapper userAccountMapper;
+
     @Resource
     private UserLoginRecordMapper userLoginRecordMapper;
 
@@ -139,5 +141,36 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         queryWrapper.eq("mobile", mobile);
         Integer count = baseMapper.selectCount(queryWrapper);
         return count != null && count.equals(1);
+    }
+
+    @Override
+    public UserIndexVO getIndexUserVo(Long userId) {
+        // 封装数据
+        UserIndexVO userIndexVO = new UserIndexVO();
+        userIndexVO.setUserId(userId);
+        UserInfo userInfo = baseMapper.selectById(userId);
+        if (userInfo != null) {
+            userIndexVO.setUserType(userInfo.getUserType()); // 用户类型
+            userIndexVO.setName(userInfo.getName());
+            userIndexVO.setNickName(userInfo.getNickName());
+            userIndexVO.setBindStatus(userInfo.getBindStatus());
+            userIndexVO.setHeadImg(userInfo.getHeadImg());
+        }
+        // 金额
+        QueryWrapper<UserAccount> userAccountQueryWrapper = new QueryWrapper<>();
+        userAccountQueryWrapper.eq("user_id", userId);
+        UserAccount userAccount = userAccountMapper.selectOne(userAccountQueryWrapper);
+        if (userAccount != null) {
+            userIndexVO.setAmount(userAccount.getAmount());
+            userIndexVO.setFreezeAmount(userAccount.getFreezeAmount());
+        }
+        // 最近登录时间
+        QueryWrapper<UserLoginRecord> userLoginRecordQueryWrapper = new QueryWrapper<>();
+        userLoginRecordQueryWrapper.eq("user_id", userId).orderByDesc("id").last("limit 1");
+        UserLoginRecord userLoginRecord = userLoginRecordMapper.selectOne(userLoginRecordQueryWrapper);
+        if (userLoginRecord != null) {
+            userIndexVO.setLastLoginTime(userLoginRecord.getCreateTime());
+        }
+        return userIndexVO;
     }
 }
