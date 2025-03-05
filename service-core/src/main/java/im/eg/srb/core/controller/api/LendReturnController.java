@@ -2,17 +2,16 @@ package im.eg.srb.core.controller.api;
 
 
 import im.eg.common.result.R;
+import im.eg.srb.base.util.JwtUtils;
 import im.eg.srb.core.service.LendReturnService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -35,4 +34,14 @@ public class LendReturnController {
     public R list(@ApiParam(value = "标的 id", required = true) @PathVariable Long lendId) {
         return R.ok().data("list", lendReturnService.listById(lendId));
     }
+
+    @ApiOperation("用户还款")
+    @PostMapping("/auth/commitReturn/{lendReturnId}")
+    public R commitReturn(@ApiParam(value = "还款计划 id", required = true) @PathVariable Long lendReturnId,
+                          HttpServletRequest request) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        return R.ok().data("formStr", lendReturnService.commitReturn(lendReturnId, userId));
+    }
+
 }
